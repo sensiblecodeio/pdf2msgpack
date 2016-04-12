@@ -70,7 +70,7 @@ def build(ctx):
         features = 'static_linking'
 
     ctx.program(
-        source=ctx.path.ant_glob('src/*.cpp'),  # pdf-dumper.cpp',
+        source=ctx.path.ant_glob('src/*.cpp'),
         target='pdf2msgpack',
         use="poppler",
         features=features,

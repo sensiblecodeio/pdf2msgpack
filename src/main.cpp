@@ -16,7 +16,7 @@ static std::string fmt(Object *o, UnicodeMap *uMap);
 int main(int argc, char *argv[]) {
 
   if (argc < 2) {
-    printf("usage: pdf-dumper <filename>\n");
+    printf("usage: pdf2msgpack <filename>\n");
     exit(1);
   }
 
