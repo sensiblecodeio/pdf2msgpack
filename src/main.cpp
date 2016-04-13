@@ -35,6 +35,32 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 	return out;
 }
 
+void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
+	printf("Pages:	  %d\n", doc->getNumPages());
+	printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
+
+	Object info;
+	doc->getDocInfo(&info);
+	auto dict = info.getDict();
+
+	printf("Keys: ");
+	for (int i = 0; i < dict->getLength(); i++) {
+		printf("%s, ", dict->getKey(i));
+	}
+	printf("\n");
+
+	if (info.isDict()) {
+		auto dict = info.getDict();
+		Object o;
+		std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
+
+		// printInfoString(dict, "Creator",      "Creator:	", uMap);
+		// printInfoString(dict, "Producer",     "Producer:       ", uMap);
+		// printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
+		// printInfoString(dict, "ModDate",      "ModDate:	", uMap);
+	}
+}
+
 void dump_document(PDFDoc *doc) {
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = 1; i < doc->getNumPages()+1; i++) {
@@ -87,29 +113,6 @@ int main(int argc, char *argv[]) {
 		exit(63);
 	}
 
-	printf("Pages:	  %d\n", doc->getNumPages());
-	printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
-
-	Object info;
-	doc->getDocInfo(&info);
-	auto dict = info.getDict();
-
-	printf("Keys: ");
-	for (int i = 0; i < dict->getLength(); i++) {
-		printf("%s, ", dict->getKey(i));
-	}
-	printf("\n");
-
-	if (info.isDict()) {
-		auto dict = info.getDict();
-		Object o;
-		std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
-
-		// printInfoString(dict, "Creator",      "Creator:	", uMap);
-		// printInfoString(dict, "Producer",     "Producer:       ", uMap);
-		// printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
-		// printInfoString(dict, "ModDate",      "ModDate:	", uMap);
-	}
-
+	dump_document_meta(doc, uMap);
 	dump_document(doc);
 }
