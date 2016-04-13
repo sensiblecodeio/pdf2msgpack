@@ -54,9 +54,9 @@ public:
   void drawChar(
       GfxState *state,
       double x, double y,
-			double dx, double dy,
-			double originX, double originY,
-			CharCode code, int nBytes, Unicode *u, int uLen
+      double dx, double dy,
+      double originX, double originY,
+      CharCode code, int nBytes, Unicode *u, int uLen
   ) {
     printf("char %d %c\n", code, char(int(*u)));
 
@@ -111,15 +111,15 @@ public:
 
 
   void drawImageMask(GfxState *state, Object *ref, Stream *str,
-			     int width, int height, GBool invert, GBool interpolate,
-			     GBool inlineImg) {
+           int width, int height, GBool invert, GBool interpolate,
+           GBool inlineImg) {
     printf("drawImageMask()\n");
   }
 
   void setSoftMaskFromImageMask(GfxState *state,
-					Object *ref, Stream *str,
-					int width, int height, GBool invert,
-					GBool inlineImg, double *baseMatrix) {
+          Object *ref, Stream *str,
+          int width, int height, GBool invert,
+          GBool inlineImg, double *baseMatrix) {
     printf("setSoftMaskFromImageMask()\n");
   }
 
@@ -128,27 +128,27 @@ public:
   }
 
   void drawImage(GfxState *state, Object *ref, Stream *str,
-			 int width, int height, GfxImageColorMap *colorMap,
-			 GBool interpolate, int *maskColors, GBool inlineImg) {
+       int width, int height, GfxImageColorMap *colorMap,
+       GBool interpolate, int *maskColors, GBool inlineImg) {
     printf("drawImage()\n");
   }
 
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
-			       int width, int height,
-			       GfxImageColorMap *colorMap, GBool interpolate,
-			       Stream *maskStr, int maskWidth, int maskHeight,
-			       GBool maskInvert, GBool maskInterpolate) {
+             int width, int height,
+             GfxImageColorMap *colorMap, GBool interpolate,
+             Stream *maskStr, int maskWidth, int maskHeight,
+             GBool maskInvert, GBool maskInterpolate) {
     printf("drawMaskedImage()\n");
   }
 
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
-				   int width, int height,
-				   GfxImageColorMap *colorMap,
-				   GBool interpolate,
-				   Stream *maskStr,
-				   int maskWidth, int maskHeight,
-				   GfxImageColorMap *maskColorMap,
-				   GBool maskInterpolate) {
+           int width, int height,
+           GfxImageColorMap *colorMap,
+           GBool interpolate,
+           Stream *maskStr,
+           int maskWidth, int maskHeight,
+           GfxImageColorMap *maskColorMap,
+           GBool maskInterpolate) {
     printf("drawSoftMaskedImage()\n");
   }
 
