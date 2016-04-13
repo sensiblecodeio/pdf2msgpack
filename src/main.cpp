@@ -92,7 +92,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (!globalParams) {
-		// Required by poppler in order to not segfault.
 		globalParams = new GlobalParams();
 	}
 
@@ -101,12 +100,10 @@ int main(int argc, char *argv[]) {
 		exit(127);
 	}
 
-	// printf("Encoding: %s\n", globalParams->getTextEncodingName()->getCString());
-
 	auto doc = new PDFDoc(new GooString(argv[1]));
-
-	if (!doc)
-	exit(64);
+	if (!doc) {
+		exit(64);
+	}
 
 	if (!doc->isOk()) {
 		fprintf(stderr, "Failed to open: %d\n", doc->getErrorCode());
