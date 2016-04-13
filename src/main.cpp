@@ -12,97 +12,100 @@
 #include "dumper.h"
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {
-  if (!o)
-    return "<nil>";
-  if (!o->isString())
-    return "<not string>";
+	if (!o)
+	return "<nil>";
+	if (!o->isString())
+	return "<not string>";
 
-  auto s = o->getString();
+	auto s = o->getString();
 
-  char buf[9];
-  Unicode *u;
-  auto len = TextStringToUCS4(s, &u);
+	char buf[9];
+	Unicode *u;
+	auto len = TextStringToUCS4(s, &u);
 
-  std::string out;
-  out.reserve(static_cast<size_t>(len));
+	std::string out;
+	out.reserve(static_cast<size_t>(len));
 
-  for (auto i = 0; i < len; i++) {
-    auto n = uMap->mapUnicode(u[i], buf, sizeof(buf));
-    out.append(buf, n);
-  }
+	for (auto i = 0; i < len; i++) {
+		auto n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+		out.append(buf, n);
+	}
 
-  return out;
+	return out;
 }
-
 
 int main(int argc, char *argv[]) {
 
-  if (argc < 2) {
-    printf("usage: pdf2msgpack <filename>\n");
-    exit(1);
-  }
+	if (argc < 2) {
+		printf("usage: pdf2msgpack <filename>\n");
+		exit(1);
+	}
 
-  if (!globalParams) {
-    // Required by poppler in order to not segfault.
-    globalParams = new GlobalParams();
-  }
+	if (!globalParams) {
+		// Required by poppler in order to not segfault.
+		globalParams = new GlobalParams();
+	}
 
-  UnicodeMap *uMap;
-  if (!(uMap = globalParams->getTextEncoding())) {
-    exit(127);
-  }
+	UnicodeMap *uMap;
+	if (!(uMap = globalParams->getTextEncoding())) {
+		exit(127);
+	}
 
-  // printf("Encoding: %s\n", globalParams->getTextEncodingName()->getCString());
+	// printf("Encoding: %s\n", globalParams->getTextEncodingName()->getCString());
 
-  auto doc = new PDFDoc(new GooString(argv[1]));
+	auto doc = new PDFDoc(new GooString(argv[1]));
 
-  if (!doc)
-    exit(64);
+	if (!doc)
+	exit(64);
 
-  if (!doc->isOk()) {
-    fprintf(stderr, "Failed to open: %d\n", doc->getErrorCode());
-    exit(63);
-  }
+	if (!doc->isOk()) {
+		fprintf(stderr, "Failed to open: %d\n", doc->getErrorCode());
+		exit(63);
+	}
 
-  printf("Pages:          %d\n", doc->getNumPages());
-  printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
+	printf("Pages:	  %d\n", doc->getNumPages());
+	printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
 
-  Object info;
-  doc->getDocInfo(&info);
-  auto dict = info.getDict();
+	Object info;
+	doc->getDocInfo(&info);
+	auto dict = info.getDict();
 
-  printf("Keys: ");
-  for (int i = 0; i < dict->getLength(); i++) {
-    printf("%s, ", dict->getKey(i));
-  }
-  printf("\n");
+	printf("Keys: ");
+	for (int i = 0; i < dict->getLength(); i++) {
+		printf("%s, ", dict->getKey(i));
+	}
+	printf("\n");
 
-  if (info.isDict()) {
-    auto dict = info.getDict();
-    Object o;
-    std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
+	if (info.isDict()) {
+		auto dict = info.getDict();
+		Object o;
+		std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
 
-    // printInfoString(dict, "Creator",      "Creator:        ", uMap);
-    // printInfoString(dict, "Producer",     "Producer:       ", uMap);
-    // printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
-    // printInfoString(dict, "ModDate",      "ModDate:        ", uMap);
-  }
+		// printInfoString(dict, "Creator",      "Creator:	", uMap);
+		// printInfoString(dict, "Producer",     "Producer:       ", uMap);
+		// printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
+		// printInfoString(dict, "ModDate",      "ModDate:	", uMap);
+	}
 
-  // Pages are one-based in this API. Beware, 0 based elsewhere.
-  for (int i = 1; i < doc->getNumPages()+1; i++) {
-    auto page = doc->getPage(i);
+	// Pages are one-based in this API. Beware, 0 based elsewhere.
+	for (int i = 1; i < doc->getNumPages()+1; i++) {
+		auto page = doc->getPage(i);
 
-    auto dev = new DumpOutputDev();
-    auto gfx = page->createGfx(
-      dev,
-      72.0, 72.0, 0,
-      gFalse, /* useMediaBox */
-      gTrue, /* Crop */
-      -1, -1, -1, -1,
-      gFalse, /* printing */
-      NULL, NULL
-    );
+		OutputDev *dev = NULL;
 
-    page->display(gfx);
-  }
+		// dev = new DumpOutputDev();
+		dev = new FullDumpOutputDev();
+
+		auto gfx = page->createGfx(
+			dev,
+			72.0, 72.0, 0,
+			gFalse, /* useMediaBox */
+			gTrue, /* Crop */
+			-1, -1, -1, -1,
+			gFalse, /* printing */
+			NULL, NULL
+		);
+
+		page->display(gfx);
+	}
 }
