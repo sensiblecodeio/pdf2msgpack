@@ -11,7 +11,29 @@
 
 #include "dumper.h"
 
-static std::string fmt(Object *o, UnicodeMap *uMap);
+static std::string fmt(Object *o, UnicodeMap *uMap) {
+  if (!o)
+    return "<nil>";
+  if (!o->isString())
+    return "<not string>";
+
+  auto s = o->getString();
+
+  char buf[9];
+  Unicode *u;
+  auto len = TextStringToUCS4(s, &u);
+
+  std::string out;
+  out.reserve(static_cast<size_t>(len));
+
+  for (auto i = 0; i < len; i++) {
+    auto n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+    out.append(buf, n);
+  }
+
+  return out;
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -83,27 +105,4 @@ int main(int argc, char *argv[]) {
 
     page->display(gfx);
   }
-}
-
-static std::string fmt(Object *o, UnicodeMap *uMap) {
-  if (!o)
-    return "<nil>";
-  if (!o->isString())
-    return "<not string>";
-
-  auto s = o->getString();
-
-  char buf[9];
-  Unicode *u;
-  auto len = TextStringToUCS4(s, &u);
-
-  std::string out;
-  out.reserve(static_cast<size_t>(len));
-
-  for (auto i = 0; i < len; i++) {
-    auto n = uMap->mapUnicode(u[i], buf, sizeof(buf));
-    out.append(buf, n);
-  }
-
-  return out;
 }
