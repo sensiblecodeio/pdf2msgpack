@@ -1,8 +1,6 @@
 FROM alpine
 
-RUN apk add --no-cache poppler-dev
-RUN apk add --no-cache python3
-RUN apk add --no-cache build-base
+RUN apk add --no-cache build-base poppler-dev python3
 
 COPY . /src
 WORKDIR /src
