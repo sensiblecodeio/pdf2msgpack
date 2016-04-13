@@ -34,8 +34,31 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 	return out;
 }
 
-int main(int argc, char *argv[]) {
+void dump_document(PDFDoc *doc) {
+	// Pages are one-based in this API. Beware, 0 based elsewhere.
+	for (int i = 1; i < doc->getNumPages()+1; i++) {
+		auto page = doc->getPage(i);
 
+		OutputDev *dev = NULL;
+
+		// dev = new DumpOutputDev();
+		dev = new FullDumpOutputDev();
+
+		auto gfx = page->createGfx(
+			dev,
+			72.0, 72.0, 0,
+			gFalse, /* useMediaBox */
+			gTrue, /* Crop */
+			-1, -1, -1, -1,
+			gFalse, /* printing */
+			NULL, NULL
+		);
+
+		page->display(gfx);
+	}
+}
+
+int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		printf("usage: pdf2msgpack <filename>\n");
 		exit(1);
@@ -87,25 +110,5 @@ int main(int argc, char *argv[]) {
 		// printInfoString(dict, "ModDate",      "ModDate:	", uMap);
 	}
 
-	// Pages are one-based in this API. Beware, 0 based elsewhere.
-	for (int i = 1; i < doc->getNumPages()+1; i++) {
-		auto page = doc->getPage(i);
-
-		OutputDev *dev = NULL;
-
-		// dev = new DumpOutputDev();
-		dev = new FullDumpOutputDev();
-
-		auto gfx = page->createGfx(
-			dev,
-			72.0, 72.0, 0,
-			gFalse, /* useMediaBox */
-			gTrue, /* Crop */
-			-1, -1, -1, -1,
-			gFalse, /* printing */
-			NULL, NULL
-		);
-
-		page->display(gfx);
-	}
+	dump_document(doc);
 }
