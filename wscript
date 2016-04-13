@@ -50,6 +50,7 @@ def configure(ctx):
 
         ctx.check_cxx(stlib="png", uselib_store='poppler')
         ctx.check_cxx(stlib="jpeg", uselib_store='poppler')
+        ctx.check_cxx(stlib="lcms2", uselib_store='poppler')
         ctx.check_cxx(stlib="pthread", uselib_store='poppler')
 
     else:
