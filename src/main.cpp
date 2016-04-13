@@ -9,7 +9,8 @@
 #include <poppler/UnicodeMap.h>
 #include <poppler/UTF.h>
 
-#include "dumper.h"
+#include "DumpAsMsgPackDev.h"
+#include "DumpAsTextDev.h"
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {
 	if (!o)
@@ -41,8 +42,8 @@ void dump_document(PDFDoc *doc) {
 
 		OutputDev *dev = NULL;
 
-		// dev = new DumpOutputDev();
-		dev = new FullDumpOutputDev();
+		// dev = new DumpAsTextDev();
+		dev = new DumpAsMsgPackDev();
 
 		auto gfx = page->createGfx(
 			dev,
