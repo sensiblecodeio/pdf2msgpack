@@ -43,15 +43,9 @@ def configure(ctx):
 
         ctx.check_cfg(package='poppler', uselib_store='poppler',
                       args=['--cflags', '--libs', '--static'])
-        ctx.check_cxx(stlib="fontconfig", uselib_store='poppler')
-        ctx.check_cxx(stlib="expat", uselib_store='poppler')
-        ctx.check_cxx(stlib="freetype", uselib_store='poppler')
-        ctx.check_cxx(stlib="z", uselib_store='poppler')
 
-        ctx.check_cxx(stlib="png", uselib_store='poppler')
-        ctx.check_cxx(stlib="jpeg", uselib_store='poppler')
-        ctx.check_cxx(stlib="lcms2", uselib_store='poppler')
-        ctx.check_cxx(stlib="pthread", uselib_store='poppler')
+        poppler_stlib = "fontconfig expat freetype z png jpeg lcms2 pthread"
+        ctx.check_cxx(stlib=poppler_stlib, uselib_store='poppler')
 
     else:
         ctx.msg("Building dynamic binaries", "yes")
