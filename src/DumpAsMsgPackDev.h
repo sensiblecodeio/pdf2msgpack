@@ -1,32 +1,47 @@
 #include <iostream>
+#include <string>
 
 #include <msgpack.hpp>
 #include <poppler/OutputDev.h>
 #include <poppler/GfxState.h>
 #include <poppler/GfxFont.h>
 
-msgpack::packer<std::ostream> packer(&std::cout);
+#include "util.hpp"
+
+bool equal(const GfxRGB &left, const GfxRGB &right) {
+    return left.r == right.r && left.g == right.g && left.b == right.b;
+}
 
 class DumpAsMsgPackDev : public OutputDev {
 public:
   GfxFont *lastFont;
+  GfxRGB prev;
+
+  DumpAsMsgPackDev(msgpack::packer<std::ostream> &packer)
+    : packer(packer) {}
+
+  msgpack::packer<std::ostream> &packer;
 
 public:
 
-  GBool upsideDown() { return gTrue; }
+  GBool upsideDown() { return gFalse; }
   GBool useDrawChar() { return gTrue; }
   GBool interpretType3Chars() { return gTrue; }
 
   void updateStrokeColor(GfxState *state) {
     GfxRGB rgb;
     state->getStrokeRGB(&rgb);
-    printf("New stroke color: %d %d %d\n", rgb.r, rgb.g, rgb.b);
+
+    if (!equal(prev, rgb)) {
+        // printf("New stroke color: %d %d %d\n", rgb.r, rgb.g, rgb.b);
+        prev = rgb;
+    }
   }
 
   void updateFillColor(GfxState *state) {
     GfxRGB rgb;
     state->getFillRGB(&rgb);
-    printf("New fill color: %d %d %d\n", rgb.r, rgb.g, rgb.b);
+    // printf("New fill color: %d %d %d\n", rgb.r, rgb.g, rgb.b);
   }
 
   void updateFont(GfxState *state) {
@@ -36,19 +51,20 @@ public:
     if (font == lastFont)
       return;
     lastFont = font;
-    printf("New font: %s\n", font->getName()->getCString());
+    // printf("New font: %s\n", font->getName()->getCString());
   }
 
   void updateTextMat(GfxState *state) {
-    printf("updateTextMat()\n");
+    // printf("updateTextMat()\n");
+
   }
 
   void updateRender(GfxState *state) {
-    printf("updateRender()\n");
+    // printf("updateRender()\n");
   }
 
   void updateRise(GfxState *) {
-    printf("updateRise()\n");
+    // printf("updateRise()\n");
   }
 
   void drawChar(
@@ -58,10 +74,24 @@ public:
       double originX, double originY,
       CharCode code, int nBytes, Unicode *u, int uLen
   ) {
-    printf("char %d %c\n", code, char(int(*u)));
+    auto utf8 = toUTF8(std::u32string(reinterpret_cast<char32_t*>(u), uLen));
 
-    // msgpack::type::tuple<double, double, double, double, double, double> //, CharCode, int>
-    //   msg(x, y, dx, dy, originX, originY); //, code, nBytes);
+    double m[4];
+    state->getFontTransMat(&m[0], &m[1], &m[2], &m[3]);
+
+
+    double size = state->getFontSize();
+
+    // printf("Out: %s\n", utf8.c_str());
+
+
+
+    // printf("char %d %c\n", code, char(int(*u)));
+
+    msgpack::type::tuple<double, double, double, double, double, double, std::string, double, double, double, double, double> //, CharCode, int>
+      msg(x, y, dx, dy, originX, originY, utf8, m[0], m[1], m[2], m[3], size); //, code, nBytes);
+
+    packer.pack(msg);
     //
     // packer.pack_array(2);
     // packer.pack(msg);
@@ -72,14 +102,14 @@ public:
   }
 
   void stroke(GfxState *state) {
-    printf("stroke\n");
-    doPath(state->getPath());
+    // printf("stroke\n");
+    // doPath(state->getPath());
   }
 
 
   void fill(GfxState *state) {
-    printf("fill\n");
-    doPath(state->getPath());
+    // printf("fill\n");
+    // doPath(state->getPath());
   }
 
   void doPath(GfxPath *path) {
@@ -113,24 +143,24 @@ public:
   void drawImageMask(GfxState *state, Object *ref, Stream *str,
            int width, int height, GBool invert, GBool interpolate,
            GBool inlineImg) {
-    printf("drawImageMask()\n");
+    // printf("drawImageMask()\n");
   }
 
   void setSoftMaskFromImageMask(GfxState *state,
           Object *ref, Stream *str,
           int width, int height, GBool invert,
           GBool inlineImg, double *baseMatrix) {
-    printf("setSoftMaskFromImageMask()\n");
+    // printf("setSoftMaskFromImageMask()\n");
   }
 
   void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) {
-    printf("unsetSoftMaskFromImageMask()\n");
+    // printf("unsetSoftMaskFromImageMask()\n");
   }
 
   void drawImage(GfxState *state, Object *ref, Stream *str,
        int width, int height, GfxImageColorMap *colorMap,
        GBool interpolate, int *maskColors, GBool inlineImg) {
-    printf("drawImage()\n");
+    // printf("drawImage()\n");
   }
 
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
@@ -138,7 +168,7 @@ public:
              GfxImageColorMap *colorMap, GBool interpolate,
              Stream *maskStr, int maskWidth, int maskHeight,
              GBool maskInvert, GBool maskInterpolate) {
-    printf("drawMaskedImage()\n");
+    // printf("drawMaskedImage()\n");
   }
 
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
@@ -149,7 +179,7 @@ public:
            int maskWidth, int maskHeight,
            GfxImageColorMap *maskColorMap,
            GBool maskInterpolate) {
-    printf("drawSoftMaskedImage()\n");
+    // printf("drawSoftMaskedImage()\n");
   }
 
 };

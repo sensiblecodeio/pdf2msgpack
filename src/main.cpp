@@ -9,8 +9,13 @@
 #include <poppler/UnicodeMap.h>
 #include <poppler/UTF.h>
 
+#include <msgpack.hpp>
+
 #include "DumpAsMsgPackDev.h"
 #include "DumpAsTextDev.h"
+
+msgpack::packer<std::ostream> packer(&std::cout);
+
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {
 	if (!o)
@@ -62,14 +67,19 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 }
 
 void dump_document(PDFDoc *doc) {
+	OutputDev *dev = NULL;
+
+	// dev = new DumpAsTextDev();
+	dev = new DumpAsMsgPackDev(packer);
+
+	// packer.pack("DOCUMENT");
+
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = 1; i < doc->getNumPages()+1; i++) {
+
+		// packer.pack("PAGE");
+
 		auto page = doc->getPage(i);
-
-		OutputDev *dev = NULL;
-
-		// dev = new DumpAsTextDev();
-		dev = new DumpAsMsgPackDev();
 
 		auto gfx = page->createGfx(
 			dev,
@@ -110,6 +120,6 @@ int main(int argc, char *argv[]) {
 		exit(63);
 	}
 
-	dump_document_meta(doc, uMap);
+	// dump_document_meta(doc, uMap);
 	dump_document(doc);
 }
