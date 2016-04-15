@@ -38,7 +38,7 @@ def configure(ctx):
         "-Wall",
         "-Werror",
         "-ansi",
-        "-std=c++0x",
+        "--std=c++11",
     ])
 
     if ctx.options.release:
