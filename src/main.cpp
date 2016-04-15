@@ -137,11 +137,9 @@ void dump_page(Page *page) {
 				packer.pack(std::make_tuple(rect, toUTF8(word, k)));
 			}
 
-
 			double x1, y1, x2, y2;
 			double x3, y3, x4, y4;
 			word->getBBox (&x1, &y1, &x2, &y2);
-
 
 			if (j < line_words->getLength() - 1)
 			{
@@ -158,7 +156,6 @@ void dump_page(Page *page) {
 				packer.pack(std::make_tuple(rect, " "));
 			}
 
-			// delete word;
 			delete word_sel;
 		}
 
