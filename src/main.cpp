@@ -3,6 +3,8 @@
 #include <sstream>
 
 #include <stdio.h>
+#include <sys/prctl.h>
+#include <linux/seccomp.h>
 
 #include <sys/stat.h>
 
@@ -15,6 +17,8 @@
 #include <poppler/UTF.h>
 #include <poppler/TextOutputDev.h>
 #include <poppler/goo/GooList.h>
+#include <poppler/goo/gfile.h>
+#include <poppler/goo/GooString.h>
 
 #include <msgpack.hpp>
 
@@ -24,6 +28,57 @@
 #include "DumpAsTextDev.h"
 
 msgpack::packer<std::ostream> packer(&std::cout);
+
+#include "seccomp-bpf.h"
+#include "syscall-reporter.h"
+
+static int install_syscall_filter(void)
+{
+	struct sock_filter filter[] = {
+		/* Validate architecture. */
+		VALIDATE_ARCHITECTURE,
+		/* Grab the system call number. */
+		EXAMINE_SYSCALL,
+		/* List allowed syscalls. */
+		ALLOW_SYSCALL(open),
+		ALLOW_SYSCALL(close),
+		ALLOW_SYSCALL(ioctl),
+		ALLOW_SYSCALL(read),
+		ALLOW_SYSCALL(readv),
+		ALLOW_SYSCALL(pread64),
+		ALLOW_SYSCALL(write),
+		ALLOW_SYSCALL(writev),
+		ALLOW_SYSCALL(lseek),
+		ALLOW_SYSCALL(futex),
+		ALLOW_SYSCALL(time),
+		ALLOW_SYSCALL(gettimeofday),
+		ALLOW_SYSCALL(fstat),
+		ALLOW_SYSCALL(mmap),
+		ALLOW_SYSCALL(munmap),
+		ALLOW_SYSCALL(madvise),
+		ALLOW_SYSCALL(mremap),
+		ALLOW_SYSCALL(brk),
+		ALLOW_SYSCALL(exit),
+		ALLOW_SYSCALL(exit_group),
+		KILL_PROCESS,
+	};
+	install_syscall_reporter();
+
+	struct sock_fprog prog = {
+		.len = (unsigned short)(sizeof(filter)/sizeof(filter[0])),
+		.filter = filter,
+	};
+
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)) {
+		perror("prctl(NO_NEW_PRIVS)");
+		exit(99);
+	}
+	if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog)) {
+		perror("prctl(SECCOMP)");
+		exit(99);
+	}
+	return 0;
+}
 
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {
@@ -241,6 +296,18 @@ void dump_document(PDFDoc *doc, const Options &options) {
 	}
 }
 
+BaseStream* open_file(const std::string filename) {
+	GooString goo_filename(filename.c_str());
+	auto file = GooFile::open(&goo_filename);
+	if (file == NULL) {
+		std::cerr << "Failed to open " << filename << std::endl;
+		exit(5);
+	}
+	Object obj;
+	obj.initNull();
+	return new FileStream(file, 0, gFalse, file->size(), &obj);
+}
+
 std::string parse_page_range(std::string value, Options *options) {
 	uint8_t c;
 
@@ -319,19 +386,23 @@ int main(int argc, char *argv[]) {
 	if (err != "") {
 		std::cerr << "Error: " << err << std::endl;
 		usage();
-		exit(1);
+		return 1;
 	}
+
+	auto file = open_file(options.filename);
 
 	if (!globalParams) {
 		globalParams = new GlobalParams("/usr/share/poppler");
 	}
 
+	install_syscall_filter();
 	UnicodeMap *uMap;
 	if (!(uMap = globalParams->getTextEncoding())) {
 		exit(127);
 	}
 
-	auto doc = new PDFDoc(new GooString(options.filename.c_str()));
+
+	auto doc = new PDFDoc(file);
 	if (!doc) {
 		std::cerr << "Problem loading document." << std::endl;
 		exit(64);
