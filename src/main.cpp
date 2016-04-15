@@ -93,6 +93,21 @@ TextPage* page_to_text_page(Page *page) {
 	return text;
 }
 
+int count_glyphs(GooList **word_list, int n_lines) {
+	int total_glyphs = 0;
+
+	for (int l = 0; l < n_lines; l++) {
+		auto *words = word_list[l];
+		total_glyphs += words->getLength() - 1; // spaces
+		for (int j = 0; j < words->getLength(); j++) {
+			auto *x = reinterpret_cast<TextWordSelection *>(words->get(j));
+			auto *word = reinterpret_cast<TextWord*>(x->getWord());
+			total_glyphs += word->getLength();
+		}
+	}
+	return total_glyphs;
+}
+
 void dump_page(Page *page) {
 	auto text = page_to_text_page(page);
 
@@ -103,17 +118,7 @@ void dump_page(Page *page) {
 	int n_lines;
 	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
 
-	int total_glyphs = 0;
-
-	for (int l = 0; l < n_lines; l++) {
-		auto *words = word_list[l];
-        total_glyphs += words->getLength() - 1; // spaces
-		for (int j = 0; j < words->getLength(); j++) {
-			auto *x = reinterpret_cast<TextWordSelection *>(words->get(j));
-			auto *word = reinterpret_cast<TextWord*>(x->getWord());
-			total_glyphs += word->getLength();
-		}
-	}
+	int total_glyphs = count_glyphs(word_list, n_lines);
 
 	packer.pack_array(total_glyphs);
 
