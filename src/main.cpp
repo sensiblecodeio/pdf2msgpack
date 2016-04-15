@@ -179,7 +179,7 @@ void dump_document(PDFDoc *doc) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		printf("usage: pdf2msgpack <filename>\n");
+		std::cerr << "usage: pdf2msgpack <filename>" << std::endl;
 		exit(1);
 	}
 
@@ -194,11 +194,12 @@ int main(int argc, char *argv[]) {
 
 	auto doc = new PDFDoc(new GooString(argv[1]));
 	if (!doc) {
+		std::cerr << "Problem loading document." << std::endl;
 		exit(64);
 	}
 
 	if (!doc->isOk()) {
-		fprintf(stderr, "Failed to open: %d\n", doc->getErrorCode());
+		std::cerr << "Failed to open: " << doc->getErrorCode() << std::endl;
 		exit(63);
 	}
 
