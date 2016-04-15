@@ -169,9 +169,6 @@ void dump_page(Page *page) {
 void dump_document(PDFDoc *doc) {
 	int n_pages = doc->getNumPages();
 
-	if (n_pages > 500)
-		n_pages = 500;
-
 	packer.pack_array(n_pages);
 
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
