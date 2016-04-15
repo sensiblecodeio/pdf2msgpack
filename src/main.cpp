@@ -96,17 +96,12 @@ TextPage* page_to_text_page(Page *page) {
 void dump_page(Page *page) {
 	auto text = page_to_text_page(page);
 
+	PDFRectangle selection = {
+		x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
+	};
+
 	int n_lines;
-
-	PDFRectangle selection;
-	auto page_height = page->getCropWidth();
-	auto page_width = page->getCropHeight();
-
-	selection.x2 = page_width;
-	selection.y2 = page_height;
-
 	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
-
 
 	int total_glyphs = 0;
 
