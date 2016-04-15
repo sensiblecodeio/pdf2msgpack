@@ -94,15 +94,11 @@ TextPage* page_to_text_page(Page *page) {
 }
 
 void dump_page(Page *page) {
-
 	auto text = page_to_text_page(page);
 
 	int n_lines;
 
 	PDFRectangle selection;
-
-	// TODO set selection to be the page.
-
 	auto page_height = page->getCropWidth();
 	auto page_width = page->getCropHeight();
 
