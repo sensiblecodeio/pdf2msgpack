@@ -3,11 +3,14 @@
 #include <stdio.h>
 
 #include <poppler/GlobalParams.h>
+#include <poppler/Gfx.h>
 #include <poppler/Page.h>
 #include <poppler/PDFDoc.h>
 #include <poppler/DateInfo.h>
 #include <poppler/UnicodeMap.h>
 #include <poppler/UTF.h>
+#include <poppler/TextOutputDev.h>
+#include <poppler/goo/GooList.h>
 
 #include <msgpack.hpp>
 
@@ -42,7 +45,7 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 
 void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 	printf("Pages:	  %d\n", doc->getNumPages());
-	printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
+	printf("PDF version:	%d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
 
 	Object info;
 	doc->getDocInfo(&info);
@@ -59,39 +62,121 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 		Object o;
 		std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
 
-		// printInfoString(dict, "Creator",      "Creator:	", uMap);
-		// printInfoString(dict, "Producer",     "Producer:       ", uMap);
+		// printInfoString(dict, "Creator",	  "Creator:	", uMap);
+		// printInfoString(dict, "Producer",	 "Producer:	   ", uMap);
 		// printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
-		// printInfoString(dict, "ModDate",      "ModDate:	", uMap);
+		// printInfoString(dict, "ModDate",	  "ModDate:	", uMap);
 	}
 }
 
+void dump_page(Page *page) {
+	auto dev = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
+
+	auto gfx = page->createGfx(
+		dev,
+		72.0, 72.0, 0,
+		gFalse, /* useMediaBox */
+		gTrue, /* Crop */
+		-1, -1, -1, -1,
+		gFalse, /* printing */
+		NULL, NULL
+	);
+
+	page->display(gfx);
+	dev->endPage();
+
+	auto text = dev->takeText();
+
+	delete gfx;
+	delete dev;
+
+	int n_lines;
+
+	PDFRectangle selection;
+
+	// TODO set selection to be the page.
+
+	auto page_height = page->getCropWidth();
+	auto page_width = page->getCropHeight();
+
+	selection.x2 = page_width;
+	selection.y2 = page_height;
+
+	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
+
+
+	int total_glyphs = 0;
+
+	for (int l = 0; l < n_lines; l++) {
+		auto *words = word_list[l];
+        total_glyphs += words->getLength() - 1; // spaces
+		for (int j = 0; j < words->getLength(); j++) {
+			auto *x = reinterpret_cast<TextWordSelection *>(words->get(j));
+			auto *word = reinterpret_cast<TextWord*>(x->getWord());
+			total_glyphs += word->getLength();
+		}
+	}
+
+	packer.pack_array(total_glyphs);
+
+	for (int l = 0; l < n_lines; l++) {
+		GooList *line_words = word_list[l];
+
+		for (int j = 0; j < line_words->getLength(); j++) {
+			TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+			TextWord *word = word_sel->getWord();
+
+			for (int k = 0; k < word->getLength(); k++) {
+				double x1, y1, x2, y2;
+				word->getCharBBox(k, &x1, &y1, &x2, &y2);
+
+				auto rect = std::make_tuple(x1, y1, x2, y2);
+				packer.pack(std::make_tuple(rect, toUTF8(word, k)));
+			}
+
+
+			double x1, y1, x2, y2;
+			double x3, y3, x4, y4;
+			word->getBBox (&x1, &y1, &x2, &y2);
+
+
+			if (j < line_words->getLength() - 1)
+			{
+				TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j + 1);
+				word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
+				// space is from one word to other and with the same height as
+				// first word.
+				x1 = x2;
+				y1 = y1;
+				x2 = x3;
+				y2 = y2;
+
+				auto rect = std::make_tuple(x1, y1, x2, y2);
+				packer.pack(std::make_tuple(rect, " "));
+			}
+
+			// delete word;
+			delete word_sel;
+		}
+
+		delete line_words;
+	}
+
+	gfree(word_list);
+	text->decRefCnt();
+}
+
 void dump_document(PDFDoc *doc) {
-	OutputDev *dev = NULL;
+	int n_pages = doc->getNumPages();
 
-	// dev = new DumpAsTextDev();
-	dev = new DumpAsMsgPackDev(packer);
+	if (n_pages > 500)
+		n_pages = 500;
 
-	// packer.pack("DOCUMENT");
+	packer.pack_array(n_pages);
 
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
-	for (int i = 1; i < doc->getNumPages()+1; i++) {
-
-		// packer.pack("PAGE");
-
-		auto page = doc->getPage(i);
-
-		auto gfx = page->createGfx(
-			dev,
-			72.0, 72.0, 0,
-			gFalse, /* useMediaBox */
-			gTrue, /* Crop */
-			-1, -1, -1, -1,
-			gFalse, /* printing */
-			NULL, NULL
-		);
-
-		page->display(gfx);
+	for (int i = 1; i < n_pages+1; i++) {
+		dump_page(doc->getPage(i));
 	}
 }
 
@@ -122,4 +207,6 @@ int main(int argc, char *argv[]) {
 
 	// dump_document_meta(doc, uMap);
 	dump_document(doc);
+
+	delete doc;
 }
