@@ -21,20 +21,34 @@ def options(opt):
     opt.add_option('--static', action='store_true', default=False,
                    help='Build static binaries')
 
+    opt.add_option('--sanitize', action='store', default=False,
+                   help='Use -fsanitize={leak,address,undefined}')
+
+    opt.add_option('--release', action='store_true', default=False,
+                   help='Enable optimizations')
+
 
 def configure(ctx):
     ctx.load('compiler_cxx')
 
     ctx.check(features='cxx cxxprogram', cxxflags="--std=c++11")
+
     ctx.env.append_value("CXXFLAGS", [
         "-g",
         "-Wall",
-        "-Wno-deprecated-register",
         "-Werror",
         "-ansi",
-        "-fno-strict-aliasing",
         "-std=c++0x",
     ])
+
+    if ctx.options.release:
+        ctx.env.append_value("CXXFLAGS", ["-O2"])
+
+    if ctx.options.sanitize:
+        ctx.msg("Enable sanitizer", ctx.options.sanitize)
+        param = "-fsanitize={}".format(ctx.options.sanitize)
+        ctx.env.append_value("CXXFLAGS", [param])
+        ctx.env.append_value("LINKFLAGS", [param])
 
     if ctx.options.static:
         ctx.msg("Building static binaries", "yes")
