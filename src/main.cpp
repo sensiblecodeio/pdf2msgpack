@@ -108,20 +108,7 @@ int count_glyphs(GooList **word_list, int n_lines) {
 	return total_glyphs;
 }
 
-void dump_page(Page *page) {
-	auto text = page_to_text_page(page);
-
-	PDFRectangle selection = {
-		x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
-	};
-
-	int n_lines;
-	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
-
-	int total_glyphs = count_glyphs(word_list, n_lines);
-
-	packer.pack_array(total_glyphs);
-
+void dump_glyphs(GooList **word_list, int n_lines) {
 	for (int l = 0; l < n_lines; l++) {
 		GooList *line_words = word_list[l];
 
@@ -155,14 +142,33 @@ void dump_page(Page *page) {
 				auto rect = std::make_tuple(x1, y1, x2, y2);
 				packer.pack(std::make_tuple(rect, " "));
 			}
-
-			delete word_sel;
 		}
-
-		delete line_words;
 	}
+}
 
-	gfree(word_list);
+void free_word_list(GooList **lines, int n_lines) {
+	for (int i = 0; i < n_lines; i++) {
+		deleteGooList(lines[i], TextWordSelection);
+	}
+	gfree(lines);
+}
+
+void dump_page(Page *page) {
+	auto text = page_to_text_page(page);
+
+	PDFRectangle selection = {
+		x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
+	};
+
+	int n_lines;
+	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
+
+	int total_glyphs = count_glyphs(word_list, n_lines);
+
+	packer.pack_array(total_glyphs);
+	dump_glyphs(word_list, n_lines);
+
+	free_word_list(word_list, n_lines);
 	text->decRefCnt();
 }
 
