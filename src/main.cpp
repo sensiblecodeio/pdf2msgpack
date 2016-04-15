@@ -69,7 +69,7 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 	}
 }
 
-void dump_page(Page *page) {
+TextPage* page_to_text_page(Page *page) {
 	auto dev = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
 
 	auto gfx = page->createGfx(
@@ -89,6 +89,13 @@ void dump_page(Page *page) {
 
 	delete gfx;
 	delete dev;
+
+	return text;
+}
+
+void dump_page(Page *page) {
+
+	auto text = page_to_text_page(page);
 
 	int n_lines;
 
