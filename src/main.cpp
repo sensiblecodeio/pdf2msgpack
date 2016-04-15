@@ -44,6 +44,11 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 }
 
 void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
+
+	// TODO(pwaller):
+	// * Decide what it's useful to dump here.
+	// * Dump it in msgpack format.
+
 	printf("Pages:	  %d\n", doc->getNumPages());
 	printf("PDF version:	%d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
 
@@ -70,6 +75,11 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 }
 
 TextPage* page_to_text_page(Page *page) {
+
+	// TODO(pwaller):
+	// * Deal with rotated pages (multiples of 90 degrees).
+	// * Deal with rotated text (arbitrarily rotated).
+
 	auto dev = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
 
 	auto gfx = page->createGfx(
