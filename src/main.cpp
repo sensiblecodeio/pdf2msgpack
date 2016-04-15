@@ -93,11 +93,11 @@ TextPage* page_to_text_page(Page *page) {
 	return text;
 }
 
-int count_glyphs(GooList **word_list, int n_lines) {
+int count_glyphs(GooList **lines, int n_lines) {
 	int total_glyphs = 0;
 
-	for (int l = 0; l < n_lines; l++) {
-		auto *words = word_list[l];
+	for (int i = 0; i < n_lines; i++) {
+		auto *words = lines[i];
 		total_glyphs += words->getLength() - 1; // spaces
 		for (int j = 0; j < words->getLength(); j++) {
 			auto *x = reinterpret_cast<TextWordSelection *>(words->get(j));
@@ -108,14 +108,17 @@ int count_glyphs(GooList **word_list, int n_lines) {
 	return total_glyphs;
 }
 
-void dump_glyphs(GooList **word_list, int n_lines) {
-	for (int l = 0; l < n_lines; l++) {
-		GooList *line_words = word_list[l];
+void dump_glyphs(GooList **lines, int n_lines) {
+	// Lines
+	for (int i = 0; i < n_lines; i++) {
+		GooList *line_words = lines[i];
 
+		// Words
 		for (int j = 0; j < line_words->getLength(); j++) {
-			TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+			auto word_sel = reinterpret_cast<TextWordSelection*>(line_words->get(j));
 			TextWord *word = word_sel->getWord();
 
+			// Glyphs
 			for (int k = 0; k < word->getLength(); k++) {
 				double x1, y1, x2, y2;
 				word->getCharBBox(k, &x1, &y1, &x2, &y2);
@@ -128,9 +131,9 @@ void dump_glyphs(GooList **word_list, int n_lines) {
 			double x3, y3, x4, y4;
 			word->getBBox (&x1, &y1, &x2, &y2);
 
-			if (j < line_words->getLength() - 1)
-			{
-				TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j + 1);
+			// Spaces
+			if (j < line_words->getLength() - 1) {
+				auto word_sel = reinterpret_cast<TextWordSelection*>(line_words->get(j + 1));
 				word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 				// space is from one word to other and with the same height as
 				// first word.
@@ -156,6 +159,7 @@ void free_word_list(GooList **lines, int n_lines) {
 void dump_page(Page *page) {
 	auto text = page_to_text_page(page);
 
+	// Whole page
 	PDFRectangle selection = {
 		x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
 	};
