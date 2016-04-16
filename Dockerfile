@@ -89,11 +89,11 @@ ENV CXXFLAGS="-I/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/buil
 COPY ./src /src/src
 COPY waf waf
 COPY msgpack-c msgpack-c
-
-
-
 COPY wscript wscript
+
+
 RUN ./waf configure --static
 RUN ./waf build
+
 
 ENTRYPOINT ["/src/build/pdf2msgpack"]
