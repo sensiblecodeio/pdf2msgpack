@@ -92,7 +92,7 @@ COPY msgpack-c msgpack-c
 COPY wscript wscript
 
 
-RUN ./waf configure --static
+RUN ./waf configure --static --release
 RUN ./waf build
 
 
