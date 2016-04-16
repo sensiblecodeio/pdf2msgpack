@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (!globalParams) {
-		globalParams = new GlobalParams();
+		globalParams = new GlobalParams("/usr/share/poppler");
 	}
 
 	UnicodeMap *uMap;
