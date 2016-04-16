@@ -4,16 +4,17 @@ RUN apk add --no-cache \
       autoconf \
       automake \
       build-base \
+      bzip2-dev \
       cmake \
+      expat-dev \
       gettext-dev \
       gperf \
       libtool \
+      libpng-dev \
       py-lxml \
       py-six \
-      python3
-
-RUN apk add --no-cache \
-      expat-dev libpng-dev zlib-dev bzip2-dev
+      python3 \
+      zlib-dev
 
 COPY ./vendor /src/vendor
 WORKDIR /src
@@ -21,8 +22,6 @@ RUN chown nobody:nogroup -R /src
 
 USER nobody:nogroup
 
-
-# && mkdir build && cd build \
 RUN cd vendor/git.savannah.gnu.org/r/freetype/freetype2.git/ \
  && NOCONFIGURE=1 ./autogen.sh \
  # workaround for docker #9547 (Text file busy) \
@@ -35,6 +34,7 @@ RUN cd vendor/git.savannah.gnu.org/r/freetype/freetype2.git/ \
 ENV PKG_CONFIG_PATH="/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH"
 ENV LINKFLAGS="-L/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib $LINKFLAGS"
 
+
 RUN cd vendor/anongit.freedesktop.org/git/fontconfig \
  && NOCONFIGURE=1 ./autogen.sh \
  && mkdir build && cd build \
@@ -44,6 +44,7 @@ RUN cd vendor/anongit.freedesktop.org/git/fontconfig \
 
 ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/fontconfig/build/install/lib/pkgconfig:$PKG_CONFIG_PATH"
 ENV LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/fontconfig/build/install/lib $LINKFLAGS"
+
 
 RUN cd vendor/github.com/mm2/Little-CMS/ \
  && mkdir build && cd build \
@@ -69,8 +70,6 @@ ENV LINKFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LI
 RUN cd vendor/anongit.freedesktop.org/git/poppler/poppler.git \
  && NOCONFIGURE=1 ./autogen.sh \
  && mkdir build && cd build \
- && export PKG_CONFIG_PATH=$(find /src/vendor -iname "pkgconfig" | grep install | xargs | tr ' ' ':') \
- && echo Using PKG_CONFIG_PATH $PKG_CONFIG_PATH \
  && ../configure \
       --prefix=$PWD/install \
       --disable-poppler-glib \
@@ -85,6 +84,7 @@ RUN cd vendor/anongit.freedesktop.org/git/poppler/poppler.git \
 ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH"
 ENV LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib $LINKFLAGS"
 ENV CXXFLAGS="-I/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/include $CXXFLAGS"
+
 
 COPY ./src /src/src
 COPY waf waf
