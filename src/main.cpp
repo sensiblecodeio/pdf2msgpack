@@ -14,6 +14,8 @@
 
 #include <msgpack.hpp>
 
+#include "util.hpp"
+
 #include "DumpAsMsgPackDev.h"
 #include "DumpAsTextDev.h"
 

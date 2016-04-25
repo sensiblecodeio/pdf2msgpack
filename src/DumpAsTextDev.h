@@ -2,6 +2,8 @@
 #include <poppler/GfxState.h>
 #include <poppler/GfxFont.h>
 
+#include "util.hpp"
+
 // Automatically generated, lists all functions and their prototypes.
 // (Or see poppler/OutputDev.h).
 class DumpAsTextDev : public OutputDev {
@@ -459,7 +461,9 @@ public:
 
 
   void drawChar(GfxState * A, double B, double C, double D, double E, double F, double G, CharCode H, int I, Unicode * J, int K) {
-    printf("drawChar(%c)\n", char(int(*J)));
+    auto s = toUTF8(J, K);
+    // printf("drawChar(%s)\n", char(int(*J)));
+    std::cout << "drawChar(" << s << ")" << std::endl;
     return OutputDev::drawChar(A, B, C, D, E, F, G, H, I, J, K);
   }
 
