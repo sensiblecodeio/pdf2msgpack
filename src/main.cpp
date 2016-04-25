@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 #include <stdio.h>
 
@@ -171,9 +172,12 @@ void free_word_list(GooList **lines, int n_lines) {
 void dump_page(Page *page) {
 	auto text = page_to_text_page(page);
 
+	const auto inf = std::numeric_limits<double>::infinity();
+
 	// Whole page
 	PDFRectangle selection = {
-		x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
+		// x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
+		x1: -inf, y1: -inf, x2: inf, y2: inf,
 	};
 
 	int n_lines;
