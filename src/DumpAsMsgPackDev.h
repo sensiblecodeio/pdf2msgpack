@@ -9,6 +9,9 @@
 
 #include "util.hpp"
 
+const int LINE_TO = 0;
+const int CURVE_TO = 1;
+
 bool equal(const GfxRGB &left, const GfxRGB &right) {
     return left.r == right.r && left.g == right.g && left.b == right.b;
 }
@@ -139,20 +142,20 @@ public:
           // subpath->getX(j+1), subpath->getY(j+1),
           // subpath->getX(j+2), subpath->getY(j+2));
           // path_count++;
-          auto x0 = subpath->getX(j),
-               y0 = subpath->getY(j),
-               x1 = subpath->getX(j+1),
-               y1 = subpath->getY(j+1),
-               x2 = subpath->getX(j+2),
-               y2 = subpath->getY(j+2);
+          auto a = subpath->getX(j),
+               b = subpath->getY(j),
+               c = subpath->getX(j+1),
+               d = subpath->getY(j+1),
+               e = subpath->getX(j+2),
+               f = subpath->getY(j+2);
 
-          packer.pack(std::make_tuple(1, x0, y0, x1, y1, x2, y2));
+          packer.pack(std::make_tuple(CURVE_TO, a, b, c, d, e, f));
           j += 3;
         } else {
           path_count++;
-          auto x0 = subpath->getX(j),
-               y0 = subpath->getY(j);
-          packer.pack(std::make_tuple(0, x0, y0));
+          auto a = subpath->getX(j),
+               b = subpath->getY(j);
+          packer.pack(std::make_tuple(LINE_TO, a, b));
           // printf("  end %f %f l\n", subpath->getX(j), subpath->getY(j));
           ++j;
         }
