@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <msgpack.hpp>
@@ -17,12 +18,18 @@ public:
   GfxFont *lastFont;
   GfxRGB prev;
 
-  DumpAsMsgPackDev(msgpack::packer<std::ostream> &packer)
-    : packer(packer) {}
+  DumpAsMsgPackDev() : packer(buffer), path_count(0) {}
 
-  msgpack::packer<std::ostream> &packer;
+  std::stringstream buffer;
+  msgpack::packer<std::ostream> packer;
+  int path_count;
 
 public:
+
+  void pack(std::ostream &out) {
+    msgpack::packer<std::ostream>(out).pack_array(path_count);
+    out << buffer.rdbuf();
+  }
 
   GBool upsideDown() { return gFalse; }
   GBool useDrawChar() { return gTrue; }
@@ -67,7 +74,7 @@ public:
     // printf("updateRise()\n");
   }
 
-  void drawChar(
+  void drawCharDisabled(
       GfxState *state,
       double x, double y,
       double dx, double dy,
@@ -101,15 +108,19 @@ public:
     //   packer.pack(u[i]);
   }
 
-  void stroke(GfxState *state) {
-    // printf("stroke\n");
-    // doPath(state->getPath());
+  void eoFill(GfxState *state) {
+    // printf("eoFill\n");
+    doPath(state->getPath());
   }
 
+  void stroke(GfxState *state) {
+    // printf("stroke\n");
+    doPath(state->getPath());
+  }
 
   void fill(GfxState *state) {
     // printf("fill\n");
-    // doPath(state->getPath());
+    doPath(state->getPath());
   }
 
   void doPath(GfxPath *path) {
@@ -119,22 +130,35 @@ public:
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
 
-      printf("  start %f %f\n", subpath->getX(0), subpath->getY(0));
+      // printf("  start %f %f\n", subpath->getX(0), subpath->getY(0));
       auto j = 1;
       while (j < m) {
         if (subpath->getCurve(j)) {
-          printf("   point %f %f %f %f %f %f c\n",
-          subpath->getX(j), subpath->getY(j),
-          subpath->getX(j+1), subpath->getY(j+1),
-          subpath->getX(j+2), subpath->getY(j+2));
+          // printf("   point %f %f %f %f %f %f c\n",
+          // subpath->getX(j), subpath->getY(j),
+          // subpath->getX(j+1), subpath->getY(j+1),
+          // subpath->getX(j+2), subpath->getY(j+2));
+          // path_count++;
+          auto x0 = subpath->getX(j),
+               y0 = subpath->getY(j),
+               x1 = subpath->getX(j+1),
+               y1 = subpath->getY(j+1),
+               x2 = subpath->getX(j+2),
+               y2 = subpath->getY(j+2);
+
+          packer.pack(std::make_tuple(1, x0, y0, x1, y1, x2, y2));
           j += 3;
         } else {
-          printf("  end %f %f l\n", subpath->getX(j), subpath->getY(j));
+          path_count++;
+          auto x0 = subpath->getX(j),
+               y0 = subpath->getY(j);
+          packer.pack(std::make_tuple(0, x0, y0));
+          // printf("  end %f %f l\n", subpath->getX(j), subpath->getY(j));
           ++j;
         }
       }
       if (subpath->isClosed()) {
-        printf("  closed\n");
+        // printf("  closed\n");
       }
     }
   }

@@ -173,7 +173,7 @@ void free_word_list(GooList **lines, int n_lines) {
 	gfree(lines);
 }
 
-void dump_page(Page *page) {
+void dump_page_glyphs(Page *page) {
 	auto text = page_to_text_page(page);
 
 	const auto inf = std::numeric_limits<double>::infinity();
@@ -190,6 +190,34 @@ void dump_page(Page *page) {
 
 	free_word_list(word_list, n_lines);
 	text->decRefCnt();
+}
+
+void dump_page_paths(Page *page) {
+	auto dev = new DumpAsMsgPackDev();
+
+	auto gfx = page->createGfx(
+		dev,
+		72.0, 72.0, 0,
+		gFalse, /* useMediaBox */
+		gTrue, /* Crop */
+		-1, -1, -1, -1,
+		gFalse, /* printing */
+		NULL, NULL
+	);
+
+	page->display(gfx);
+	dev->endPage();
+
+	dev->pack(std::cout);
+
+	delete gfx;
+	delete dev;
+}
+
+void dump_page(Page *page) {
+	packer.pack_array(2);
+	dump_page_glyphs(page);
+	dump_page_paths(page);
 }
 
 class Options {
