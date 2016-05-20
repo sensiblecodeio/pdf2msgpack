@@ -136,9 +136,9 @@ public:
           j += 3;
         } else {
           path_count++;
-          auto a = subpath->getX(j),
-               b = subpath->getY(j);
-          packer.pack(std::make_tuple(pathType, LINE_TO, a, b));
+          auto x = subpath->getX(j),
+               y = subpath->getY(j);
+          packer.pack(std::make_tuple(pathType, LINE_TO, x, y));
           ++j;
         }
       }
