@@ -92,37 +92,21 @@ public:
 
     double size = state->getFontSize();
 
-    // printf("Out: %s\n", utf8.c_str());
-
-
-
-    // printf("char %d %c\n", code, char(int(*u)));
-
     msgpack::type::tuple<double, double, double, double, double, double, std::string, double, double, double, double, double> //, CharCode, int>
       msg(x, y, dx, dy, originX, originY, utf8, m[0], m[1], m[2], m[3], size); //, code, nBytes);
 
     packer.pack(msg);
-    //
-    // packer.pack_array(2);
-    // packer.pack(msg);
-    //
-    // packer.pack_array(uLen);
-    // for (int i = 0; i < uLen; i++)
-    //   packer.pack(u[i]);
   }
 
   void eoFill(GfxState *state) {
-    // printf("eoFill\n");
     doPath(state->getPath());
   }
 
   void stroke(GfxState *state) {
-    // printf("stroke\n");
     doPath(state->getPath());
   }
 
   void fill(GfxState *state) {
-    // printf("fill\n");
     doPath(state->getPath());
   }
 
@@ -133,15 +117,10 @@ public:
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
 
-      // printf("  start %f %f\n", subpath->getX(0), subpath->getY(0));
       auto j = 1;
       while (j < m) {
         if (subpath->getCurve(j)) {
-          // printf("   point %f %f %f %f %f %f c\n",
-          // subpath->getX(j), subpath->getY(j),
-          // subpath->getX(j+1), subpath->getY(j+1),
-          // subpath->getX(j+2), subpath->getY(j+2));
-          // path_count++;
+          path_count++;
           auto a = subpath->getX(j),
                b = subpath->getY(j),
                c = subpath->getX(j+1),
@@ -156,12 +135,11 @@ public:
           auto a = subpath->getX(j),
                b = subpath->getY(j);
           packer.pack(std::make_tuple(LINE_TO, a, b));
-          // printf("  end %f %f l\n", subpath->getX(j), subpath->getY(j));
           ++j;
         }
       }
       if (subpath->isClosed()) {
-        // printf("  closed\n");
+        // perform action if subpath is closed
       }
     }
   }
