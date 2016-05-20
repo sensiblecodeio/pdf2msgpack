@@ -33,6 +33,12 @@ public:
 
 public:
 
+  // Writes the packed path information to a stream.
+  //
+  // The `packer` is initialized with a `buffer`
+  // when an instance of `DumpAsMsgPackDev` is created.
+  // The path information is written to the `packer` and
+  // the packed data is in this method streamed to `out`.
   void pack(std::ostream &out) {
     msgpack::packer<std::ostream>(out).pack_array(path_count);
     out << buffer.rdbuf();
