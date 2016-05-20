@@ -12,6 +12,10 @@
 const int LINE_TO = 0;
 const int CURVE_TO = 1;
 
+const int EO_FILL = 10;
+const int STROKE = 11;
+const int FILL = 12;
+
 bool equal(const GfxRGB &left, const GfxRGB &right) {
     return left.r == right.r && left.g == right.g && left.b == right.b;
 }
@@ -99,18 +103,18 @@ public:
   }
 
   void eoFill(GfxState *state) {
-    doPath(state->getPath());
+    doPath(state->getPath(), EO_FILL);
   }
 
   void stroke(GfxState *state) {
-    doPath(state->getPath());
+    doPath(state->getPath(), STROKE);
   }
 
   void fill(GfxState *state) {
-    doPath(state->getPath());
+    doPath(state->getPath(), FILL);
   }
 
-  void doPath(GfxPath *path) {
+  void doPath(GfxPath *path, int pathType) {
     auto n = path->getNumSubpaths();
 
     for (auto i = 0; i < n; ++i) {
@@ -128,13 +132,13 @@ public:
                e = subpath->getX(j+2),
                f = subpath->getY(j+2);
 
-          packer.pack(std::make_tuple(CURVE_TO, a, b, c, d, e, f));
+          packer.pack(std::make_tuple(pathType, CURVE_TO, a, b, c, d, e, f));
           j += 3;
         } else {
           path_count++;
           auto a = subpath->getX(j),
                b = subpath->getY(j);
-          packer.pack(std::make_tuple(LINE_TO, a, b));
+          packer.pack(std::make_tuple(pathType, LINE_TO, a, b));
           ++j;
         }
       }
