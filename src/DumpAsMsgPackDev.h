@@ -27,7 +27,7 @@ public:
 
   DumpAsMsgPackDev() : packer(buffer), path_count(0) {}
 
-  std::stringstream buffer;
+  std::ostringstream buffer;
   msgpack::packer<std::ostream> packer;
   int path_count;
 
@@ -41,7 +41,7 @@ public:
   // the packed data is in this method streamed to `out`.
   void pack(std::ostream &out) {
     msgpack::packer<std::ostream>(out).pack_array(path_count);
-    out << buffer.rdbuf();
+    out << buffer.str();
   }
 
   GBool upsideDown() { return gFalse; }
