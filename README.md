@@ -38,3 +38,7 @@ make
 `pdf2msgpack` writes its output to [msgpack](http://msgpack.org), which is a convenient, fast serialization format with libraries available in many languages.
 
 The format is in flux and the best way to find out about it is to run `pdf2msgpack` and look at the output in python with `msgpack.load()`.
+
+# Licence
+
+`pdf2msgpack` is licensed under the GPLv2.
