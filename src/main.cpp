@@ -150,10 +150,11 @@ void dump_glyphs(GooList **lines, int n_lines) {
 				word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 				// space is from one word to other and with the same height as
 				// first word.
+				
 				x1 = x2;
-				y1 = y1;
+				// y1 = y1; (implicit)
 				x2 = x3;
-				y2 = y2;
+				// y2 = y2; (implicit)
 
 				auto rect = std::make_tuple(x1, y1, x2, y2);
 				packer.pack(std::make_tuple(rect, " "));
@@ -174,14 +175,10 @@ void dump_page(Page *page) {
 
 	const auto inf = std::numeric_limits<double>::infinity();
 
-	// Whole page
-	PDFRectangle selection = {
-		// x1: 0, y1: 0, x2: page->getCropWidth(), y2: page->getCropHeight(),
-		x1: -inf, y1: -inf, x2: inf, y2: inf,
-	};
+	PDFRectangle whole_page(-inf, -inf, inf, inf);
 
 	int n_lines;
-	auto word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
+	auto word_list = text->getSelectionWords(&whole_page, selectionStyleGlyph, &n_lines);
 
 	int total_glyphs = count_glyphs(word_list, n_lines);
 
