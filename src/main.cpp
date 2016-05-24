@@ -20,7 +20,7 @@
 
 #include "util.hpp"
 
-#include "DumpAsMsgPackDev.h"
+#include "DumpPathsAsMsgPackDev.h"
 #include "DumpAsTextDev.h"
 
 msgpack::packer<std::ostream> packer(&std::cout);
@@ -193,7 +193,7 @@ void dump_page_glyphs(Page *page) {
 }
 
 void dump_page_paths(Page *page) {
-	auto dev = new DumpAsMsgPackDev();
+	auto dev = new DumpPathsAsMsgPackDev();
 
 	auto gfx = page->createGfx(
 		dev,

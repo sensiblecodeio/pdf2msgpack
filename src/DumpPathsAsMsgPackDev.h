@@ -16,9 +16,9 @@ const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
 
-class DumpAsMsgPackDev : public OutputDev {
+class DumpPathsAsMsgPackDev : public OutputDev {
 public:
-  DumpAsMsgPackDev() : packer(buffer), path_count(0) {}
+  DumpPathsAsMsgPackDev() : packer(buffer), path_count(0) {}
 
   std::ostringstream buffer;
   msgpack::packer<std::ostream> packer;
