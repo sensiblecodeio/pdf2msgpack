@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 #include <stdio.h>
 
@@ -150,7 +151,7 @@ void dump_glyphs(GooList **lines, int n_lines) {
 				word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 				// space is from one word to other and with the same height as
 				// first word.
-				
+
 				x1 = x2;
 				// y1 = y1; (implicit)
 				x2 = x3;
@@ -189,20 +190,99 @@ void dump_page(Page *page) {
 	text->decRefCnt();
 }
 
-void dump_document(PDFDoc *doc) {
-	int n_pages = doc->getNumPages();
+class Options {
+public:
+	std::string filename;
+	int start, end;
 
-	packer.pack_array(n_pages);
+	bool range_specified() const {
+		return start != 0 && end != 0;
+	}
+
+	int page_count() const {
+		// Note: range is inclusive on the right.
+		return end - start + 1;
+	}
+};
+
+void dump_document(PDFDoc *doc, const Options &options) {
+	packer.pack_array(options.page_count());
 
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
-	for (int i = 1; i < n_pages+1; i++) {
+	for (int i = options.start; i <= options.end; i++) {
+		std::cerr << "Page " << i << std::endl;
 		dump_page(doc->getPage(i));
 	}
 }
 
+std::string parse_page_range(std::string value, Options *options) {
+	uint8_t c;
+
+	std::istringstream stream(value);
+	stream >> options->start >> c >> options->end;
+
+	auto negative = options->start < 1 || options->end < options->start;
+
+	// Must parse whole value.
+	if (c != '-' || stream.bad() || !stream.eof() || negative) {
+		options->start = options->end = 0;
+		return "invalid format for pages: specify like 1-10";
+	}
+
+	return "";
+}
+
+std::string parse_options(int argc, char *argv[], Options *options) {
+	for (int i = 1; i < argc; ++i) {
+		char const* arg = argv[i];
+
+		if ((arg[0] == '-') && (strcmp(arg, "-") != 0)) {
+			++arg;
+			if (arg[0] == '-') {
+				// Accept -arg and --arg
+				++arg;
+			}
+			char* parameter = const_cast<char*>(strchr(arg, '='));
+			if (parameter) {
+				*parameter++ = 0;
+			}
+
+			if (strcmp(arg, "pages") == 0) {
+				if (parameter == nullptr) {
+					return "--pages must be specified as --pages=a-b";
+				}
+				auto err = parse_page_range(parameter, options);
+				if (err != "") {
+					return err;
+				}
+			} else {
+				return std::string("unknown parameter specified: ") + arg;
+			}
+		} else if (options->filename == "") {
+			options->filename = arg;
+		} else {
+			return std::string("unknown parameter specified: ") + arg;
+		}
+	}
+
+	if (options->filename == "") {
+		return "no input file specified";
+	}
+
+	return "";
+}
+
+void usage() {
+	std::cerr << "usage: pdf2msgpack [--pages=a-b] <filename>" << std::endl;
+}
+
 int main(int argc, char *argv[]) {
-	if (argc < 2) {
-		std::cerr << "usage: pdf2msgpack <filename>" << std::endl;
+
+	Options options;
+	auto err = parse_options(argc, argv, &options);
+	if (err != "") {
+		std::cerr << "Error: " << err << std::endl;
+		usage();
 		exit(1);
 	}
 
@@ -215,7 +295,7 @@ int main(int argc, char *argv[]) {
 		exit(127);
 	}
 
-	auto doc = new PDFDoc(new GooString(argv[1]));
+	auto doc = new PDFDoc(new GooString(options.filename.c_str()));
 	if (!doc) {
 		std::cerr << "Problem loading document." << std::endl;
 		exit(64);
@@ -226,8 +306,21 @@ int main(int argc, char *argv[]) {
 		exit(63);
 	}
 
+	if (!options.range_specified()) {
+		options.start = 1;
+		options.end = doc->getNumPages();
+	} else if (options.start > doc->getNumPages() ||
+			   options.end > doc->getNumPages()) {
+		std::cerr << "Error: specified page range"
+				  << " (" << options.start << " - " << options.end << ")"
+				  << " exceeds document length"
+				  << " (" << doc->getNumPages() << ")" << std::endl;
+		usage();
+		exit(1);
+	}
+
 	// dump_document_meta(doc, uMap);
-	dump_document(doc);
+	dump_document(doc, options);
 
 	delete doc;
 }
