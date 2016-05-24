@@ -9,8 +9,9 @@ RUN apk add --no-cache \
       expat-dev \
       gettext-dev \
       gperf \
-      libtool \
+      libjpeg-turbo-dev \
       libpng-dev \
+      libtool \
       py-lxml \
       py-six \
       python3 \
