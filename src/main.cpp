@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+#include <sys/stat.h>
+
 #include <poppler/GlobalParams.h>
 #include <poppler/Gfx.h>
 #include <poppler/Page.h>
@@ -232,6 +234,11 @@ std::string parse_page_range(std::string value, Options *options) {
 	return "";
 }
 
+bool file_exists(std::string name) {
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
+}
+
 std::string parse_options(int argc, char *argv[], Options *options) {
 	for (int i = 1; i < argc; ++i) {
 		char const* arg = argv[i];
@@ -256,6 +263,11 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 					return err;
 				}
 			} else {
+				if (file_exists(arg) && options->filename == "") {
+					// It's a filename.
+					options->filename = arg;
+					continue;
+				}
 				return std::string("unknown parameter specified: ") + arg;
 			}
 		} else if (options->filename == "") {
