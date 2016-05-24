@@ -28,9 +28,9 @@ msgpack::packer<std::ostream> packer(&std::cout);
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {
 	if (!o)
-	return "<nil>";
+		return "<nil>";
 	if (!o->isString())
-	return "<not string>";
+		return "<not string>";
 
 	auto s = o->getString();
 
