@@ -225,6 +225,8 @@ public:
 	std::string filename;
 	int start, end;
 
+	Options() : filename(""), start(0), end(0) {}
+
 	bool range_specified() const {
 		return start != 0 && end != 0;
 	}
