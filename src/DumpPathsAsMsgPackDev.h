@@ -54,7 +54,7 @@ public:
     out << buffer.str();
   }
 
-  GBool upsideDown() { return gFalse; }
+  GBool upsideDown() { return gTrue; }
   GBool useDrawChar() { return gTrue; }
   GBool interpretType3Chars() { return gTrue; }
 
