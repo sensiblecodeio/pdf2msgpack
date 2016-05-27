@@ -242,7 +242,6 @@ void dump_document(PDFDoc *doc, const Options &options) {
 
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = options.start; i <= options.end; i++) {
-		std::cerr << "Page " << i << std::endl;
 		dump_page(doc->getPage(i));
 	}
 }

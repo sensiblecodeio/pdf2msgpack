@@ -16,6 +16,23 @@ const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
 
+typedef struct {
+  double x, y;
+} Point;
+
+class Mat2x3 {
+  const double *m;
+
+public:
+  Mat2x3(const double m[6]) : m(m) {}
+
+  inline const Point mul(const double x, const double y) const {
+    auto xt = x * m[0] + y * m[2] + m[4];
+    auto yt = x * m[1] + y * m[3] + m[5];
+    return Point{xt, yt};
+  }
+};
+
 class DumpPathsAsMsgPackDev : public OutputDev {
 public:
   DumpPathsAsMsgPackDev() : packer(buffer), path_count(0) {}
@@ -37,23 +54,23 @@ public:
     out << buffer.str();
   }
 
-  GBool upsideDown() { return gFalse; }
+  GBool upsideDown() { return gTrue; }
   GBool useDrawChar() { return gTrue; }
   GBool interpretType3Chars() { return gTrue; }
 
   void eoFill(GfxState *state) {
-    doPath(state->getPath(), EO_FILL);
+    doPath(state->getCTM(), state->getPath(), EO_FILL);
   }
 
   void stroke(GfxState *state) {
-    doPath(state->getPath(), STROKE);
+    doPath(state->getCTM(), state->getPath(), STROKE);
   }
 
   void fill(GfxState *state) {
-    doPath(state->getPath(), FILL);
+    doPath(state->getCTM(), state->getPath(), FILL);
   }
 
-  void doPath(GfxPath *path, int pathType) {
+  void doPath(const Mat2x3 &transform, GfxPath *path, int pathType) {
     auto n = path->getNumSubpaths();
 
     for (auto i = 0; i < n; ++i) {
@@ -64,25 +81,26 @@ public:
       while (j < m) {
         if (subpath->getCurve(j)) {
           path_count++;
-          auto a = subpath->getX(j),
-               b = subpath->getY(j),
-               c = subpath->getX(j+1),
-               d = subpath->getY(j+1),
-               e = subpath->getX(j+2),
-               f = subpath->getY(j+2);
 
-          packer.pack(std::make_tuple(pathType, CURVE_TO, a, b, c, d, e, f));
+          auto a = transform.mul(subpath->getX(j+0), subpath->getY(j+0)),
+               b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
+               c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
+
+          packer.pack(std::make_tuple(pathType, CURVE_TO, a.x, a.y, b.x, b.y, c.x, c.y));
           j += 3;
+
         } else {
           path_count++;
           auto x = subpath->getX(j),
                y = subpath->getY(j);
-          packer.pack(std::make_tuple(pathType, LINE_TO, x, y));
+
+          auto t = transform.mul(x, y);
+          packer.pack(std::make_tuple(pathType, LINE_TO, t.x, t.y));
           ++j;
         }
       }
       if (subpath->isClosed()) {
-        // perform action if subpath is closed
+        // TODO(pwaller, apotry): encode closed paths somehow.
       }
     }
   }
