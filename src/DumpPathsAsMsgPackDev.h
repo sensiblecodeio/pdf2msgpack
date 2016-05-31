@@ -77,30 +77,40 @@ public:
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
 
+      bool have_first = false;
+      std::tuple<int, int, double, double> first;
+
       auto j = 1;
       while (j < m) {
         if (subpath->getCurve(j)) {
-          path_count++;
 
           auto a = transform.mul(subpath->getX(j+0), subpath->getY(j+0)),
                b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
                c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
 
+          path_count++;
           packer.pack(std::make_tuple(pathType, CURVE_TO, a.x, a.y, b.x, b.y, c.x, c.y));
           j += 3;
 
         } else {
-          path_count++;
           auto x = subpath->getX(j),
                y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
-          packer.pack(std::make_tuple(pathType, LINE_TO, t.x, t.y));
+
+          auto path = std::make_tuple(pathType, LINE_TO, t.x, t.y);
+          path_count++;
+          packer.pack(path);
+          if (!have_first) {
+            first = path;
+            have_first = true;
+          }
           ++j;
         }
       }
       if (subpath->isClosed()) {
-        // TODO(pwaller, apotry): encode closed paths somehow.
+        path_count++;
+        packer.pack(first);
       }
     }
   }
