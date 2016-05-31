@@ -81,11 +81,6 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 }
 
 TextPage* page_to_text_page(Page *page) {
-
-	// TODO(pwaller):
-	// * Deal with rotated pages (multiples of 90 degrees).
-	// * Deal with rotated text (arbitrarily rotated).
-
 	auto dev = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
 
 	auto gfx = page->createGfx(
