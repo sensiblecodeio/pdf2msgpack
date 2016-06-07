@@ -40,7 +40,7 @@ public:
 
   bool is_curve;
 
-  void msgpack_pack(auto& pk) const {
+  void msgpack_pack(msgpack::packer<std::basic_ostream<char> > &pk) const {
     if (is_curve) {
       pk.pack(curve);
     } else {
