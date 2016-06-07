@@ -9,9 +9,6 @@
 
 #include "util.hpp"
 
-const int LINE_TO = 0;
-const int CURVE_TO = 1;
-
 const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
