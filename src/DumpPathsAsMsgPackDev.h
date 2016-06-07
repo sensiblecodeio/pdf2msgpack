@@ -89,7 +89,6 @@ public:
 
           auto curve = std::make_tuple(a.x, a.y, b.x, b.y, c.x, c.y);
           aggregated_curve_to.push_back(curve);
-
         } else {
           auto x = subpath->getX(j),
                y = subpath->getY(j);
@@ -97,9 +96,8 @@ public:
           auto t = transform.mul(x, y);
           auto line = std::make_tuple(t.x, t.y);
           aggregated_line_to.push_back(line);
-
-          ++j;
         }
+        ++j;
       }
       if (subpath->isClosed()) {
         if (!aggregated_line_to.empty()) {
