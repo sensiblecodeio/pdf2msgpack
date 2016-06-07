@@ -33,6 +33,25 @@ public:
   }
 };
 
+class Path {
+public:
+  Path(double x, double y): line(x, y), is_curve(false) {}
+  Path(double a, double b, double c, double d, double e, double f): curve(a, b, c, d, e, f), is_curve(true) {}
+
+  std::tuple<double, double> line;
+  std::tuple<double, double, double, double, double, double> curve;
+
+  bool is_curve;
+
+  void msgpack_pack(auto& pk) const {
+    if (is_curve) {
+      pk.pack(curve);
+    } else {
+      pk.pack(line);
+    }
+  }
+};
+
 class DumpPathsAsMsgPackDev : public OutputDev {
 public:
   DumpPathsAsMsgPackDev() : packer(buffer), path_count(0) {}
@@ -78,8 +97,7 @@ public:
       auto m = subpath->getNumPoints();
 
       auto j = 1;
-      std::vector<std::tuple<double, double>> aggregated_line_to;
-      std::vector<std::tuple<double, double, double, double, double, double>> aggregated_curve_to;
+      std::vector<Path> aggregated_path;
       while (j < m) {
         if (subpath->getCurve(j)) {
 
@@ -87,31 +105,21 @@ public:
                b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
                c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
 
-          auto curve = std::make_tuple(a.x, a.y, b.x, b.y, c.x, c.y);
-          aggregated_curve_to.push_back(curve);
+          aggregated_path.push_back(Path(a.x, a.y, b.x, b.y, c.x, c.y));
         } else {
           auto x = subpath->getX(j),
                y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
-          auto line = std::make_tuple(t.x, t.y);
-          aggregated_line_to.push_back(line);
+          aggregated_path.push_back(Path(t.x, t.y));
         }
         ++j;
       }
-      if (subpath->isClosed()) {
-        if (!aggregated_line_to.empty()) {
-          aggregated_line_to.push_back(aggregated_line_to[0]);
+      if (!aggregated_path.empty()) {
+        if (subpath->isClosed()) {
+          aggregated_path.push_back(aggregated_path[0]);
         }
-      }
-      if (!aggregated_line_to.empty()) {
-        auto path = std::make_tuple(pathType, LINE_TO, aggregated_line_to);
-        packer.pack(path);
-        path_count++;
-      }
-      if (!aggregated_curve_to.empty()) {
-        auto path = std::make_tuple(pathType, CURVE_TO, aggregated_curve_to);
-        packer.pack(path);
+        packer.pack(std::make_tuple(pathType, aggregated_path));
         path_count++;
       }
     }
