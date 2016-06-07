@@ -30,10 +30,10 @@ public:
   }
 };
 
-class Path {
+class PathPoint {
 public:
-  Path(double x, double y): line(x, y), is_curve(false) {}
-  Path(double a, double b, double c, double d, double e, double f): curve(a, b, c, d, e, f), is_curve(true) {}
+  PathPoint(double x, double y): line(x, y), is_curve(false) {}
+  PathPoint(double a, double b, double c, double d, double e, double f): curve(a, b, c, d, e, f), is_curve(true) {}
 
   std::tuple<double, double> line;
   std::tuple<double, double, double, double, double, double> curve;
@@ -94,7 +94,7 @@ public:
       auto m = subpath->getNumPoints();
 
       auto j = 1;
-      std::vector<Path> aggregated_path;
+      std::vector<PathPoint> aggregated_path;
       while (j < m) {
         if (subpath->getCurve(j)) {
 
@@ -102,13 +102,13 @@ public:
                b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
                c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
 
-          aggregated_path.push_back(Path(a.x, a.y, b.x, b.y, c.x, c.y));
+          aggregated_path.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
         } else {
           auto x = subpath->getX(j),
                y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
-          aggregated_path.push_back(Path(t.x, t.y));
+          aggregated_path.push_back(PathPoint(t.x, t.y));
         }
         ++j;
       }
