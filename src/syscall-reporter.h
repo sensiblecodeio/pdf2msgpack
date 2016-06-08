@@ -7,7 +7,7 @@
  *  Will Drewry <wad@chromium.org>
  *
  * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
+ * found in the LICENSE.seccomp file.
  */
 #ifndef _BPF_REPORTER_H_
 #define _BPF_REPORTER_H_

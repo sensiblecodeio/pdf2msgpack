@@ -7,7 +7,7 @@
  *  Kees Cook <keescook@chromium.org>
  *
  * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
+ * found in the LICENSE.seccomp file.
  */
 #ifndef _SECCOMP_BPF_H_
 #define _SECCOMP_BPF_H_
