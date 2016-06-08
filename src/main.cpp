@@ -51,33 +51,28 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 }
 
 void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
-
-	// TODO(pwaller):
-	// * Decide what it's useful to dump here.
-	// * Dump it in msgpack format.
-
-	printf("Pages:	  %d\n", doc->getNumPages());
-	printf("PDF version:	%d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
+	std::map<std::string, std::string> m;
 
 	Object info;
 	doc->getDocInfo(&info);
-	auto dict = info.getDict();
-
-	printf("Keys: ");
-	for (int i = 0; i < dict->getLength(); i++) {
-		printf("%s, ", dict->getKey(i));
-	}
-	printf("\n");
-
 	if (info.isDict()) {
 		auto dict = info.getDict();
-		Object o;
-		std::cout << "Creator: " << fmt(dict->lookup("Creator", &o), uMap) << std::endl;
 
-		// printInfoString(dict, "Creator",	  "Creator:	", uMap);
-		// printInfoString(dict, "Producer",	 "Producer:	   ", uMap);
-		// printInfoString(dict, "CreationDate", "CreationDate:   ", uMap);
-		// printInfoString(dict, "ModDate",	  "ModDate:	", uMap);
+		for (int i = 0; i < dict->getLength(); i++) {
+			Object o;
+			m[dict->getKey(i)] = fmt(dict->getVal(i, &o), uMap);
+		}
+	}
+
+	// Use packer.pack_map rather than pack(m) so we can write pages as an integer.
+	packer.pack_map(1 + m.size());
+
+	packer.pack("Pages");
+	packer.pack(doc->getNumPages());
+
+	for (auto i : m) {
+		packer.pack(i.first);
+		packer.pack(i.second);
 	}
 }
 
@@ -360,7 +355,8 @@ int main(int argc, char *argv[]) {
 	// is changed in a way which will break existing parsers.
 	const int output_format_version = 0;
 	packer.pack(output_format_version);
-	// dump_document_meta(doc, uMap);
+
+	dump_document_meta(doc, uMap);
 	dump_document(doc, options);
 
 	delete doc;
