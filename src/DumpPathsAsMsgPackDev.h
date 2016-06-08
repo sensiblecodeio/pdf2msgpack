@@ -93,7 +93,7 @@ public:
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
       auto j = 0;
-      std::vector<PathPoint> aggregated_path;
+      std::vector<PathPoint> path_points;
       while (j < m) {
         if (subpath->getCurve(j)) {
 
@@ -101,21 +101,21 @@ public:
                b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
                c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
 
-          aggregated_path.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
+          path_points.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
         } else {
           auto x = subpath->getX(j),
                y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
-          aggregated_path.push_back(PathPoint(t.x, t.y));
+          path_points.push_back(PathPoint(t.x, t.y));
         }
         ++j;
       }
-      if (!aggregated_path.empty()) {
+      if (!path_points.empty()) {
         if (subpath->isClosed()) {
-          aggregated_path.push_back(aggregated_path[0]);
+          path_points.push_back(path_points[0]);
         }
-        packer.pack(std::make_tuple(pathType, aggregated_path));
+        packer.pack(std::make_tuple(pathType, path_points));
         path_count++;
       }
     }
