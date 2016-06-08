@@ -92,8 +92,7 @@ public:
     for (auto i = 0; i < n; ++i) {
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
-
-      auto j = 1;
+      auto j = 0;
       std::vector<PathPoint> aggregated_path;
       while (j < m) {
         if (subpath->getCurve(j)) {
