@@ -86,7 +86,7 @@ public:
     doPath(state->getCTM(), state->getPath(), FILL);
   }
 
-  void doPath(const Mat2x3 &transform, GfxPath *path, int pathType) {
+  void doPath(const Mat2x3 &transform, GfxPath *path, int path_type) {
     auto n = path->getNumSubpaths();
 
     for (auto i = 0; i < n; ++i) {
@@ -115,7 +115,7 @@ public:
         if (subpath->isClosed()) {
           path_points.push_back(path_points[0]);
         }
-        packer.pack(std::make_tuple(pathType, path_points));
+        packer.pack(std::make_tuple(path_type, path_points));
         path_count++;
       }
     }
