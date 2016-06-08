@@ -12,6 +12,7 @@ RUN apk add --no-cache \
       libjpeg-turbo-dev \
       libpng-dev \
       libtool \
+      linux-headers \
       py-lxml \
       py-six \
       python3 \
