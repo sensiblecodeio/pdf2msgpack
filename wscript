@@ -27,6 +27,9 @@ def options(opt):
     opt.add_option('--release', action='store_true', default=False,
                    help='Enable optimizations')
 
+    opt.add_option('--enable-syscall-reporter', action='store_true',
+                   default=False, help='Enable syscall-reporter')
+
 
 def configure(ctx):
     ctx.load('compiler_cxx')
@@ -73,6 +76,10 @@ def configure(ctx):
     ctx.check_cxx(header_name="poppler/PDFDoc.h", use="poppler",
                   msg="Checking libpoppler-private-dev (poppler configured " +
                       "with --enable-xpdf-headers)")
+
+    if ctx.options.enable_syscall_reporter:
+        ctx.env.append_value("CXXFLAGS", ["-DENABLE_SYSCALL_REPORTER"])
+        ctx.msg("Enable syscall reporter (***NOT FOR PRODUCTION***)", "yes")
 
 
 def build(ctx):

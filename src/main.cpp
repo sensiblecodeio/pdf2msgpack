@@ -30,7 +30,9 @@
 msgpack::packer<std::ostream> packer(&std::cout);
 
 #include "seccomp-bpf.h"
+#ifdef ENABLE_SYSCALL_REPORTER
 #include "syscall-reporter.h"
+#endif
 
 static int install_syscall_filter(void)
 {
@@ -62,7 +64,10 @@ static int install_syscall_filter(void)
 		ALLOW_SYSCALL(exit_group),
 		KILL_PROCESS,
 	};
+
+	#ifdef ENABLE_SYSCALL_REPORTER
 	install_syscall_reporter();
+	#endif
 
 	struct sock_fprog prog = {
 		.len = (unsigned short)(sizeof(filter)/sizeof(filter[0])),
@@ -389,13 +394,14 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	install_syscall_filter();
+
 	auto file = open_file(options.filename);
 
 	if (!globalParams) {
 		globalParams = new GlobalParams("/usr/share/poppler");
 	}
 
-	install_syscall_filter();
 	UnicodeMap *uMap;
 	if (!(uMap = globalParams->getTextEncoding())) {
 		exit(127);
