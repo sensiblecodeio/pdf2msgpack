@@ -9,9 +9,6 @@
 
 #include "util.hpp"
 
-const int LINE_TO = 0;
-const int CURVE_TO = 1;
-
 const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
@@ -30,6 +27,25 @@ public:
     auto xt = x * m[0] + y * m[2] + m[4];
     auto yt = x * m[1] + y * m[3] + m[5];
     return Point{xt, yt};
+  }
+};
+
+class PathPoint {
+public:
+  PathPoint(double x, double y): line(x, y), is_curve(false) {}
+  PathPoint(double a, double b, double c, double d, double e, double f): curve(a, b, c, d, e, f), is_curve(true) {}
+
+  std::tuple<double, double> line;
+  std::tuple<double, double, double, double, double, double> curve;
+
+  bool is_curve;
+
+  void msgpack_pack(msgpack::packer<std::basic_ostream<char> > &pk) const {
+    if (is_curve) {
+      pk.pack(curve);
+    } else {
+      pk.pack(line);
+    }
   }
 };
 
@@ -70,17 +86,14 @@ public:
     doPath(state->getCTM(), state->getPath(), FILL);
   }
 
-  void doPath(const Mat2x3 &transform, GfxPath *path, int pathType) {
+  void doPath(const Mat2x3 &transform, GfxPath *path, int path_type) {
     auto n = path->getNumSubpaths();
 
     for (auto i = 0; i < n; ++i) {
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
-
-      bool have_first = false;
-      std::tuple<int, int, double, double> first;
-
-      auto j = 1;
+      auto j = 0;
+      std::vector<PathPoint> path_points;
       while (j < m) {
         if (subpath->getCurve(j)) {
 
@@ -88,29 +101,22 @@ public:
                b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
                c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
 
-          path_count++;
-          packer.pack(std::make_tuple(pathType, CURVE_TO, a.x, a.y, b.x, b.y, c.x, c.y));
-          j += 3;
-
+          path_points.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
         } else {
           auto x = subpath->getX(j),
                y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
-
-          auto path = std::make_tuple(pathType, LINE_TO, t.x, t.y);
-          path_count++;
-          packer.pack(path);
-          if (!have_first) {
-            first = path;
-            have_first = true;
-          }
-          ++j;
+          path_points.push_back(PathPoint(t.x, t.y));
         }
+        ++j;
       }
-      if (subpath->isClosed()) {
+      if (!path_points.empty()) {
+        if (subpath->isClosed()) {
+          path_points.push_back(path_points[0]);
+        }
+        packer.pack(std::make_tuple(path_type, path_points));
         path_count++;
-        packer.pack(first);
       }
     }
   }
