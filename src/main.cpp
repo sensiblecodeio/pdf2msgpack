@@ -34,8 +34,12 @@ msgpack::packer<std::ostream> packer(&std::cout);
 #include "syscall-reporter.h"
 #endif
 
-static int install_syscall_filter(void)
-{
+static int install_syscall_filter(void) {
+	#ifdef DISABLE_SYSCALL_REPORTER
+	if (true) {
+		return 0;
+	}
+	#endif
 	struct sock_filter filter[] = {
 		/* Validate architecture. */
 		VALIDATE_ARCHITECTURE,
@@ -394,7 +398,9 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	install_syscall_filter();
+	if (0) {
+		install_syscall_filter();
+	}
 
 	auto file = open_file(options.filename);
 

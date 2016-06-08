@@ -30,6 +30,9 @@ def options(opt):
     opt.add_option('--enable-syscall-reporter', action='store_true',
                    default=False, help='Enable syscall-reporter')
 
+    opt.add_option('--disable-syscall-filter', action='store_true',
+                   default=False, help='Disable syscall filter')
+
 
 def configure(ctx):
     ctx.load('compiler_cxx')
@@ -80,6 +83,10 @@ def configure(ctx):
     if ctx.options.enable_syscall_reporter:
         ctx.env.append_value("CXXFLAGS", ["-DENABLE_SYSCALL_REPORTER"])
         ctx.msg("Enable syscall reporter (***NOT FOR PRODUCTION***)", "yes")
+
+    if ctx.options.disable_syscall_filter:
+        ctx.env.append_value("CXXFLAGS", ["-DDISABLE_SYSCALL_REPORTER"])
+        ctx.msg("Disable syscall filter (***NOT FOR PRODUCTION***)", "yes")
 
 
 def build(ctx):
