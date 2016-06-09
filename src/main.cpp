@@ -394,9 +394,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	if (0) {
-		install_syscall_filter();
-	}
+	install_syscall_filter();
 
 	auto file = open_file(options.filename);
 
