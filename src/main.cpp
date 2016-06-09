@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include <stdio.h>
@@ -140,28 +141,30 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 	}
 }
 
-TextPage* page_to_text_page(Page *page) {
-	auto dev = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
 
-	auto gfx = page->createGfx(
-		dev,
+void TextPageDecRef(TextPage *text_page) {
+	text_page->decRefCnt();
+}
+
+typedef std::unique_ptr<TextPage, decltype(&TextPageDecRef)> TextPagePtr;
+
+TextPagePtr page_to_text_page(Page *page) {
+	auto dev = std::make_unique<TextOutputDev>(nullptr, gTrue, 0, gFalse, gFalse);
+
+	auto gfx = std::unique_ptr<Gfx>(page->createGfx(
+		dev.get(),
 		72.0, 72.0, 0,
 		gFalse, /* useMediaBox */
 		gTrue, /* Crop */
 		-1, -1, -1, -1,
 		gFalse, /* printing */
 		NULL, NULL
-	);
+	));
 
-	page->display(gfx);
+	page->display(gfx.get());
 	dev->endPage();
 
-	auto text = dev->takeText();
-
-	delete gfx;
-	delete dev;
-
-	return text;
+	return TextPagePtr(dev->takeText(), TextPageDecRef);
 }
 
 int count_glyphs(GooList **lines, int n_lines) {
@@ -221,13 +224,6 @@ void dump_glyphs(GooList **lines, int n_lines) {
 	}
 }
 
-void free_word_list(GooList **lines, int n_lines) {
-	for (int i = 0; i < n_lines; i++) {
-		deleteGooList(lines[i], TextWordSelection);
-	}
-	gfree(lines);
-}
-
 void dump_page_glyphs(Page *page) {
 	auto text = page_to_text_page(page);
 
@@ -236,37 +232,40 @@ void dump_page_glyphs(Page *page) {
 	PDFRectangle whole_page(-inf, -inf, inf, inf);
 
 	int n_lines;
-	auto word_list = text->getSelectionWords(&whole_page, selectionStyleGlyph, &n_lines);
+	auto deleter = [&](GooList** lines) {
+		for (int i = 0; i < n_lines; i++) {
+			deleteGooList(lines[i], TextWordSelection);
+		}
+		gfree(lines);
+	};
+	auto word_list = std::unique_ptr<GooList*, decltype(deleter)>(
+		text->getSelectionWords(&whole_page, selectionStyleGlyph, &n_lines),
+		deleter
+	);
 
-	int total_glyphs = count_glyphs(word_list, n_lines);
+	int total_glyphs = count_glyphs(word_list.get(), n_lines);
 
 	packer.pack_array(total_glyphs);
-	dump_glyphs(word_list, n_lines);
-
-	free_word_list(word_list, n_lines);
-	text->decRefCnt();
+	dump_glyphs(word_list.get(), n_lines);
 }
 
 void dump_page_paths(Page *page) {
-	auto dev = new DumpPathsAsMsgPackDev();
+	auto dev = std::make_unique<DumpPathsAsMsgPackDev>();
 
-	auto gfx = page->createGfx(
-		dev,
+	auto gfx = std::unique_ptr<Gfx>(page->createGfx(
+		dev.get(),
 		72.0, 72.0, 0,
 		gFalse, /* useMediaBox */
 		gTrue, /* Crop */
 		-1, -1, -1, -1,
 		gFalse, /* printing */
 		NULL, NULL
-	);
+	));
 
-	page->display(gfx);
+	page->display(gfx.get());
 	dev->endPage();
 
 	dev->pack(std::cout);
-
-	delete gfx;
-	delete dev;
 }
 
 void dump_page(Page *page) {
@@ -399,7 +398,7 @@ int main(int argc, char *argv[]) {
 		install_syscall_filter();
 	}
 
-	auto file = open_file(options.filename);
+	auto file = std::unique_ptr<BaseStream>(open_file(options.filename));
 
 	if (!globalParams) {
 		globalParams = new GlobalParams("/usr/share/poppler");
@@ -411,7 +410,7 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	auto doc = new PDFDoc(file);
+	std::unique_ptr<PDFDoc> doc(new PDFDoc(file.get()));
 	if (!doc) {
 		std::cerr << "Problem loading document." << std::endl;
 		exit(64);
@@ -440,12 +439,10 @@ int main(int argc, char *argv[]) {
 	const int output_format_version = 0;
 	packer.pack(output_format_version);
 
-	dump_document_meta(doc, uMap);
+	dump_document_meta(doc.get(), uMap);
 	if (options.meta_only) {
-		delete doc;
 		return 0;
 	}
 
-	dump_document(doc, options);
-	delete doc;
+	dump_document(doc.get(), options);
 }
