@@ -37,14 +37,14 @@ def options(opt):
 def configure(ctx):
     ctx.load('compiler_cxx')
 
-    ctx.check(features='cxx cxxprogram', cxxflags="--std=c++11")
+    ctx.check(features='cxx cxxprogram', cxxflags="--std=c++14")
 
     ctx.env.append_value("CXXFLAGS", [
         "-g",
         "-Wall",
         "-Werror",
         "-ansi",
-        "--std=c++11",
+        "--std=c++14",
     ])
 
     if ctx.options.release:
