@@ -293,8 +293,6 @@ public:
 };
 
 void dump_document(PDFDoc *doc, const Options &options) {
-	packer.pack_array(options.page_count());
-
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = options.start; i <= options.end; i++) {
 		dump_page(doc->getPage(i));
