@@ -279,8 +279,9 @@ class Options {
 public:
 	std::string filename;
 	int start, end;
+	bool meta_only;
 
-	Options() : filename(""), start(0), end(0) {}
+	Options() : filename(""), start(0), end(0), meta_only(false) {}
 
 	bool range_specified() const {
 		return start != 0 && end != 0;
@@ -356,6 +357,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 				if (err != "") {
 					return err;
 				}
+			} else if (strcmp(arg, "meta-only") == 0) {
+				options->meta_only = true;
 			} else {
 				if (file_exists(arg) && options->filename == "") {
 					// It's a filename.
@@ -438,7 +441,11 @@ int main(int argc, char *argv[]) {
 	packer.pack(output_format_version);
 
 	dump_document_meta(doc, uMap);
-	dump_document(doc, options);
+	if (options.meta_only) {
+		delete doc;
+		return 0;
+	}
 
+	dump_document(doc, options);
 	delete doc;
 }
