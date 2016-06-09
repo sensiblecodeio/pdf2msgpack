@@ -398,7 +398,7 @@ int main(int argc, char *argv[]) {
 		install_syscall_filter();
 	}
 
-	auto file = std::unique_ptr<BaseStream>(open_file(options.filename));
+	auto file = open_file(options.filename);
 
 	if (!globalParams) {
 		globalParams = new GlobalParams("/usr/share/poppler");
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	std::unique_ptr<PDFDoc> doc(new PDFDoc(file.get()));
+	std::unique_ptr<PDFDoc> doc(new PDFDoc(file));
 	if (!doc) {
 		std::cerr << "Problem loading document." << std::endl;
 		exit(64);
