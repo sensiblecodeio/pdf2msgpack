@@ -61,6 +61,7 @@ static int install_syscall_filter(void) {
 		ALLOW_SYSCALL(lseek),
 		ALLOW_SYSCALL(futex),
 		ALLOW_SYSCALL(time),
+		ALLOW_SYSCALL(clock_gettime),
 		ALLOW_SYSCALL(gettimeofday),
 		ALLOW_SYSCALL(fstat),
 		ALLOW_SYSCALL(stat),
