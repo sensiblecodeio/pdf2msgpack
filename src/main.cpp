@@ -50,6 +50,9 @@ static int install_syscall_filter(void) {
 		/* Grab the system call number. */
 		EXAMINE_SYSCALL,
 		/* List allowed syscalls. */
+		ALLOW_SYSCALL(access),
+		ALLOW_SYSCALL(fstatfs),
+		ALLOW_SYSCALL(readlink),
 		ALLOW_SYSCALL(open),
 		ALLOW_SYSCALL(close),
 		ALLOW_SYSCALL(ioctl),
