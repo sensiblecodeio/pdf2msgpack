@@ -273,8 +273,11 @@ void dump_page_paths(Page *page) {
 }
 
 void dump_page(Page *page) {
-	int n = 2;
+	int n = 3;
 	packer.pack_map(n);
+
+	packer.pack("Size");
+	packer.pack(std::make_tuple(page->getMediaWidth(), page->getMediaHeight()));
 
 	packer.pack("Glyphs");
 	dump_page_glyphs(page);
