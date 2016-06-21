@@ -385,7 +385,7 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 }
 
 void usage() {
-	std::cerr << "usage: pdf2msgpack [--pages=a-b] <filename>" << std::endl;
+	std::cerr << "usage: pdf2msgpack [--meta-only] [--pages=a-b] <filename>" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
