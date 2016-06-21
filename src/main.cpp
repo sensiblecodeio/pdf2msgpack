@@ -18,6 +18,8 @@
 #include <poppler/UnicodeMap.h>
 #include <poppler/UTF.h>
 #include <poppler/TextOutputDev.h>
+#include <poppler/SplashOutputDev.h>
+#include <poppler/splash/SplashBitmap.h>
 #include <poppler/goo/GooList.h>
 #include <poppler/FontInfo.h>
 #include <poppler/goo/gfile.h>
@@ -50,6 +52,9 @@ static int install_syscall_filter(void) {
 		/* Grab the system call number. */
 		EXAMINE_SYSCALL,
 		/* List allowed syscalls. */
+		ALLOW_SYSCALL(access),
+		ALLOW_SYSCALL(fstatfs),
+		ALLOW_SYSCALL(readlink),
 		ALLOW_SYSCALL(open),
 		ALLOW_SYSCALL(close),
 		ALLOW_SYSCALL(ioctl),
@@ -330,10 +335,51 @@ void dump_page_paths(Page *page) {
 	dev->pack(std::cout);
 }
 
-void dump_page(Page *page) {
+void dump_page_bitmap(Page *page) {
+	SplashColor paperColor;
+	paperColor[0] = 255;
+	paperColor[1] = 255;
+	paperColor[2] = 255;
+	paperColor[3] = 255;
+
+	auto mode = splashModeMono8;
+	const auto n_channels = 1;
+	// If RGB is desired.
+	// auto mode = splashModeRGB8;
+	// const auto n_channels = 3;
+
+	auto dev = std::make_unique<SplashOutputDev>(
+		mode, 4, gFalse, paperColor, gTrue, splashThinLineShape);
+
+	dev->setFontAntialias(true);
+	dev->setVectorAntialias(true);
+	dev->startDoc(page->getDoc());
+
+	page->display(
+		dev.get(),
+		// TODO(pwaller): Parameterize resolution.
+		72.0 / 8, 72.0 / 8,
+		0, // rotate
+		gFalse, /* useMediaBox */
+		gFalse, /* Crop */
+		gFalse, /* printing */
+		NULL, NULL
+	);
+
+	auto bitmap = dev->getBitmap();
+
+	auto data = reinterpret_cast<char*>(bitmap->getDataPtr());
+
 	packer.pack_array(2);
-	dump_page_glyphs(page);
-	dump_page_paths(page);
+	packer.pack(std::make_tuple(bitmap->getWidth(), bitmap->getHeight()));
+
+	const size_t amount = n_channels * bitmap->getWidth() * bitmap->getHeight();
+
+	packer.pack_bin(amount);
+	for (int i = 0; i < bitmap->getHeight() ; i++) {
+		packer.pack_bin_body(data, bitmap->getWidth() * n_channels);
+		data += bitmap->getRowSize();
+	}
 }
 
 class Options {
@@ -341,8 +387,9 @@ public:
 	std::string filename;
 	int start, end;
 	bool meta_only;
+	bool bitmap;
 
-	Options() : filename(""), start(0), end(0), meta_only(false) {}
+	Options() : filename(""), start(0), end(0), meta_only(false), bitmap(false) {}
 
 	bool range_specified() const {
 		return start != 0 && end != 0;
@@ -354,10 +401,34 @@ public:
 	}
 };
 
+void dump_page(Page *page, const Options &options) {
+	int n = 3;
+
+	if (options.bitmap) {
+		n++;
+	}
+
+	packer.pack_map(n);
+
+	packer.pack("Size");
+	packer.pack(std::make_tuple(page->getMediaWidth(), page->getMediaHeight()));
+
+	packer.pack("Glyphs");
+	dump_page_glyphs(page);
+
+	packer.pack("Paths");
+	dump_page_paths(page);
+
+	if (options.bitmap) {
+		packer.pack("Bitmap");
+		dump_page_bitmap(page);
+	}
+}
+
 void dump_document(PDFDoc *doc, const Options &options) {
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = options.start; i <= options.end; i++) {
-		dump_page(doc->getPage(i));
+		dump_page(doc->getPage(i), options);
 	}
 }
 
@@ -420,6 +491,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 				}
 			} else if (strcmp(arg, "meta-only") == 0) {
 				options->meta_only = true;
+			} else if (strcmp(arg, "bitmap") == 0) {
+				options->bitmap = true;
 			} else {
 				if (file_exists(arg) && options->filename == "") {
 					// It's a filename.
@@ -443,7 +516,7 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 }
 
 void usage() {
-	std::cerr << "usage: pdf2msgpack [--pages=a-b] <filename>" << std::endl;
+	std::cerr << "usage: pdf2msgpack [--bitmap] [--meta-only] [--pages=a-b] <filename>" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -485,18 +558,18 @@ int main(int argc, char *argv[]) {
 		options.start = 1;
 		options.end = doc->getNumPages();
 	} else if (options.start > doc->getNumPages() ||
-			   options.end > doc->getNumPages()) {
+				 options.end > doc->getNumPages()) {
 		std::cerr << "Error: specified page range"
-				  << " (" << options.start << " - " << options.end << ")"
-				  << " exceeds document length"
-				  << " (" << doc->getNumPages() << ")" << std::endl;
+							<< " (" << options.start << " - " << options.end << ")"
+							<< " exceeds document length"
+							<< " (" << doc->getNumPages() << ")" << std::endl;
 		usage();
 		exit(1);
 	}
 
 	// This version number should be incremented whenever the output format
 	// is changed in a way which will break existing parsers.
-	const int output_format_version = 0;
+	const int output_format_version = 1;
 	packer.pack(output_format_version);
 
 	dump_document_meta(options.filename, doc.get(), uMap);
