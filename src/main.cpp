@@ -511,7 +511,7 @@ int main(int argc, char *argv[]) {
 
 	// This version number should be incremented whenever the output format
 	// is changed in a way which will break existing parsers.
-	const int output_format_version = 0;
+	const int output_format_version = 1;
 	packer.pack(output_format_version);
 
 	dump_document_meta(doc.get(), uMap);
