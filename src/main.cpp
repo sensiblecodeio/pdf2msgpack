@@ -448,11 +448,11 @@ int main(int argc, char *argv[]) {
 		options.start = 1;
 		options.end = doc->getNumPages();
 	} else if (options.start > doc->getNumPages() ||
-			   options.end > doc->getNumPages()) {
+				 options.end > doc->getNumPages()) {
 		std::cerr << "Error: specified page range"
-				  << " (" << options.start << " - " << options.end << ")"
-				  << " exceeds document length"
-				  << " (" << doc->getNumPages() << ")" << std::endl;
+							<< " (" << options.start << " - " << options.end << ")"
+							<< " exceeds document length"
+							<< " (" << doc->getNumPages() << ")" << std::endl;
 		usage();
 		exit(1);
 	}
