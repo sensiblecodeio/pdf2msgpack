@@ -17,6 +17,8 @@
 #include <poppler/UnicodeMap.h>
 #include <poppler/UTF.h>
 #include <poppler/TextOutputDev.h>
+#include <poppler/SplashOutputDev.h>
+#include <poppler/splash/SplashBitmap.h>
 #include <poppler/goo/GooList.h>
 #include <poppler/goo/gfile.h>
 #include <poppler/goo/GooString.h>
@@ -272,6 +274,53 @@ void dump_page_paths(Page *page) {
 	dev->pack(std::cout);
 }
 
+void dump_page_bitmap(Page *page) {
+	SplashColor paperColor;
+	paperColor[0] = 255;
+	paperColor[1] = 255;
+	paperColor[2] = 255;
+	paperColor[3] = 255;
+
+	auto mode = splashModeMono8;
+	const auto n_channels = 1;
+	// If RGB is desired.
+	// auto mode = splashModeRGB8;
+	// const auto n_channels = 3;
+
+	auto dev = std::make_unique<SplashOutputDev>(
+		mode, 4, gFalse, paperColor, gTrue, splashThinLineShape);
+
+	dev->setFontAntialias(true);
+	dev->setVectorAntialias(true);
+	dev->startDoc(page->getDoc());
+
+	page->display(
+		dev.get(),
+		// TODO(pwaller): Parameterize resolution.
+		72.0 / 8, 72.0 / 8,
+		0, // rotate
+		gFalse, /* useMediaBox */
+		gFalse, /* Crop */
+		gFalse, /* printing */
+		NULL, NULL
+	);
+
+	auto bitmap = dev->getBitmap();
+
+	auto data = reinterpret_cast<char*>(bitmap->getDataPtr());
+
+	packer.pack_array(2);
+	packer.pack(std::make_tuple(bitmap->getWidth(), bitmap->getHeight()));
+
+	const size_t amount = n_channels * bitmap->getWidth() * bitmap->getHeight();
+
+	packer.pack_bin(amount);
+	for (int i = 0; i < bitmap->getHeight() ; i++) {
+		packer.pack_bin_body(data, bitmap->getWidth() * n_channels);
+		data += bitmap->getRowSize();
+	}
+}
+
 class Options {
 public:
 	std::string filename;
@@ -311,7 +360,7 @@ void dump_page(Page *page, const Options &options) {
 
 	if (options.bitmap) {
 		packer.pack("Bitmap");
-		packer.pack_nil();
+		dump_page_bitmap(page);
 	}
 }
 
