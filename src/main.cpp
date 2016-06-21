@@ -272,27 +272,14 @@ void dump_page_paths(Page *page) {
 	dev->pack(std::cout);
 }
 
-void dump_page(Page *page) {
-	int n = 3;
-	packer.pack_map(n);
-
-	packer.pack("Size");
-	packer.pack(std::make_tuple(page->getMediaWidth(), page->getMediaHeight()));
-
-	packer.pack("Glyphs");
-	dump_page_glyphs(page);
-
-	packer.pack("Paths");
-	dump_page_paths(page);
-}
-
 class Options {
 public:
 	std::string filename;
 	int start, end;
 	bool meta_only;
+	bool bitmap;
 
-	Options() : filename(""), start(0), end(0), meta_only(false) {}
+	Options() : filename(""), start(0), end(0), meta_only(false), bitmap(false) {}
 
 	bool range_specified() const {
 		return start != 0 && end != 0;
@@ -304,10 +291,34 @@ public:
 	}
 };
 
+void dump_page(Page *page, const Options &options) {
+	int n = 3;
+
+	if (options.bitmap) {
+		n++;
+	}
+
+	packer.pack_map(n);
+
+	packer.pack("Size");
+	packer.pack(std::make_tuple(page->getMediaWidth(), page->getMediaHeight()));
+
+	packer.pack("Glyphs");
+	dump_page_glyphs(page);
+
+	packer.pack("Paths");
+	dump_page_paths(page);
+
+	if (options.bitmap) {
+		packer.pack("Bitmap");
+		packer.pack_nil();
+	}
+}
+
 void dump_document(PDFDoc *doc, const Options &options) {
 	// Pages are one-based in this API. Beware, 0 based elsewhere.
 	for (int i = options.start; i <= options.end; i++) {
-		dump_page(doc->getPage(i));
+		dump_page(doc->getPage(i), options);
 	}
 }
 
@@ -370,6 +381,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 				}
 			} else if (strcmp(arg, "meta-only") == 0) {
 				options->meta_only = true;
+			} else if (strcmp(arg, "bitmap") == 0) {
+				options->bitmap = true;
 			} else {
 				if (file_exists(arg) && options->filename == "") {
 					// It's a filename.
