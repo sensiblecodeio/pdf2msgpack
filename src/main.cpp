@@ -273,8 +273,13 @@ void dump_page_paths(Page *page) {
 }
 
 void dump_page(Page *page) {
-	packer.pack_array(2);
+	int n = 2;
+	packer.pack_map(n);
+
+	packer.pack("Glyphs");
 	dump_page_glyphs(page);
+
+	packer.pack("Paths");
 	dump_page_paths(page);
 }
 
