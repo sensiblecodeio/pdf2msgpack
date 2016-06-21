@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <stdio.h>
+#include <libgen.h>
 #include <sys/prctl.h>
 #include <linux/seccomp.h>
 
@@ -18,6 +19,7 @@
 #include <poppler/UTF.h>
 #include <poppler/TextOutputDev.h>
 #include <poppler/goo/GooList.h>
+#include <poppler/FontInfo.h>
 #include <poppler/goo/gfile.h>
 #include <poppler/goo/GooString.h>
 
@@ -119,7 +121,58 @@ static std::string fmt(Object *o, UnicodeMap *uMap) {
 	return out;
 }
 
-void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
+static const char *fontTypeNames[] = {
+	"unknown",
+	"Type 1",
+	"Type 1C",
+	"Type 1C (OT)",
+	"Type 3",
+	"TrueType",
+	"TrueType (OT)",
+	"CID Type 0",
+	"CID Type 0C",
+	"CID Type 0C (OT)",
+	"CID TrueType",
+	"CID TrueType (OT)"
+};
+
+void dump_font_info(PDFDoc *doc) {
+	FontInfoScanner scanner(doc, 0);
+	GooList *fonts = scanner.scan(doc->getNumPages());
+
+	if (!fonts) {
+		packer.pack_nil();
+		return;
+	}
+
+	packer.pack_array(fonts->getLength());
+
+	for (int i = 0; i < fonts->getLength(); ++i) {
+		auto font = reinterpret_cast<FontInfo *>(fonts->get(i));
+
+		packer.pack_map(6);
+
+		packer.pack("Name");
+		packer.pack(font->getName() ? font->getName()->getCString() : "[none]");
+
+		packer.pack("Type");
+		packer.pack(fontTypeNames[font->getType()]);
+
+		packer.pack("Encoding");
+		packer.pack(font->getEncoding()->getCString());
+
+		packer.pack("Embedded");
+		packer.pack(font->getEmbedded());
+
+		packer.pack("Subset");
+		packer.pack(font->getSubset());
+
+		packer.pack("ToUnicode");
+		packer.pack(font->getToUnicode());
+	}
+}
+
+void dump_document_meta(const std::string filename, PDFDoc *doc, UnicodeMap *uMap) {
 	std::map<std::string, std::string> m;
 
 	Object info;
@@ -134,17 +187,22 @@ void dump_document_meta(PDFDoc *doc, UnicodeMap *uMap) {
 	}
 
 	// Use packer.pack_map rather than pack(m) so we can write pages as an integer.
-	packer.pack_map(1 + m.size());
+	packer.pack_map(3 + m.size());
+
+	packer.pack("FileName");
+	packer.pack(basename(const_cast<char*>(filename.c_str())));
 
 	packer.pack("Pages");
 	packer.pack(doc->getNumPages());
+
+	packer.pack("FontInfo");
+	dump_font_info(doc);
 
 	for (auto i : m) {
 		packer.pack(i.first);
 		packer.pack(i.second);
 	}
 }
-
 
 void TextPageDecRef(TextPage *text_page) {
 	text_page->decRefCnt();
@@ -441,7 +499,7 @@ int main(int argc, char *argv[]) {
 	const int output_format_version = 0;
 	packer.pack(output_format_version);
 
-	dump_document_meta(doc.get(), uMap);
+	dump_document_meta(options.filename, doc.get(), uMap);
 	if (options.meta_only) {
 		return 0;
 	}
