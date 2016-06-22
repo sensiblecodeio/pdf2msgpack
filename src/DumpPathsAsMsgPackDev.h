@@ -3,9 +3,9 @@
 #include <string>
 
 #include <msgpack.hpp>
-#include <poppler/OutputDev.h>
-#include <poppler/GfxState.h>
 #include <poppler/GfxFont.h>
+#include <poppler/GfxState.h>
+#include <poppler/OutputDev.h>
 
 #include "util.hpp"
 
@@ -13,9 +13,7 @@ const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
 
-typedef struct {
-  double x, y;
-} Point;
+typedef struct { double x, y; } Point;
 
 class Mat2x3 {
   const double *m;
@@ -32,15 +30,16 @@ public:
 
 class PathPoint {
 public:
-  PathPoint(double x, double y): line(x, y), is_curve(false) {}
-  PathPoint(double a, double b, double c, double d, double e, double f): curve(a, b, c, d, e, f), is_curve(true) {}
+  PathPoint(double x, double y) : line(x, y), is_curve(false) {}
+  PathPoint(double a, double b, double c, double d, double e, double f)
+      : curve(a, b, c, d, e, f), is_curve(true) {}
 
   std::tuple<double, double> line;
   std::tuple<double, double, double, double, double, double> curve;
 
   bool is_curve;
 
-  void msgpack_pack(msgpack::packer<std::basic_ostream<char> > &pk) const {
+  void msgpack_pack(msgpack::packer<std::basic_ostream<char>> &pk) const {
     if (is_curve) {
       pk.pack(curve);
     } else {
@@ -58,7 +57,6 @@ public:
   int path_count;
 
 public:
-
   // Writes the packed path information to a stream.
   //
   // The `packer` is initialized with a `buffer`
@@ -97,14 +95,13 @@ public:
       while (j < m) {
         if (subpath->getCurve(j)) {
 
-          auto a = transform.mul(subpath->getX(j+0), subpath->getY(j+0)),
-               b = transform.mul(subpath->getX(j+1), subpath->getY(j+1)),
-               c = transform.mul(subpath->getX(j+2), subpath->getY(j+2));
+          auto a = transform.mul(subpath->getX(j + 0), subpath->getY(j + 0)),
+               b = transform.mul(subpath->getX(j + 1), subpath->getY(j + 1)),
+               c = transform.mul(subpath->getX(j + 2), subpath->getY(j + 2));
 
           path_points.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
         } else {
-          auto x = subpath->getX(j),
-               y = subpath->getY(j);
+          auto x = subpath->getX(j), y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
           path_points.push_back(PathPoint(t.x, t.y));
@@ -120,5 +117,4 @@ public:
       }
     }
   }
-
 };
