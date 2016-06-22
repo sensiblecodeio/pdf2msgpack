@@ -17,4 +17,7 @@ release: pdf2msgpack
 	./release.sh
 
 
+fmt:
+	clang-format -i src/*.cpp src/*.h
+
 .PHONY: .FORCE build-container
