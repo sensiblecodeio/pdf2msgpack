@@ -83,6 +83,23 @@ static int install_syscall_filter(void) {
   return 0;
 }
 
+class Options {
+public:
+  std::string filename;
+  int start, end;
+  bool meta_only;
+  bool bitmap;
+
+  Options() : filename(""), start(0), end(0), meta_only(false), bitmap(false) {}
+
+  bool range_specified() const { return start != 0 && end != 0; }
+
+  int page_count() const {
+    // Note: range is inclusive on the right.
+    return end - start + 1;
+  }
+};
+
 static std::string fmt(Object *o, UnicodeMap *uMap) {
   if (!o)
     return "<nil>";
@@ -341,23 +358,6 @@ void dump_page_bitmap(Page *page) {
     data += bitmap->getRowSize();
   }
 }
-
-class Options {
-public:
-  std::string filename;
-  int start, end;
-  bool meta_only;
-  bool bitmap;
-
-  Options() : filename(""), start(0), end(0), meta_only(false), bitmap(false) {}
-
-  bool range_specified() const { return start != 0 && end != 0; }
-
-  int page_count() const {
-    // Note: range is inclusive on the right.
-    return end - start + 1;
-  }
-};
 
 void dump_page(Page *page, const Options &options) {
   int n = 3;
