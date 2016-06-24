@@ -89,8 +89,11 @@ public:
   int start, end;
   bool meta_only;
   bool bitmap;
+  bool font_info;
 
-  Options() : filename(""), start(0), end(0), meta_only(false), bitmap(false) {}
+  Options()
+      : filename(""), start(0), end(0), meta_only(false), bitmap(false),
+        font_info(false) {}
 
   bool range_specified() const { return start != 0 && end != 0; }
 
@@ -165,7 +168,7 @@ void dump_font_info(PDFDoc *doc) {
 }
 
 void dump_document_meta(const std::string filename, PDFDoc *doc,
-                        UnicodeMap *uMap) {
+                        UnicodeMap *uMap, const Options &options) {
   std::map<std::string, std::string> m;
 
   Object info;
@@ -190,7 +193,11 @@ void dump_document_meta(const std::string filename, PDFDoc *doc,
   packer.pack(doc->getNumPages());
 
   packer.pack("FontInfo");
-  dump_font_info(doc);
+  if (options.font_info) {
+    dump_font_info(doc);
+  } else {
+    packer.pack_nil();
+  }
 
   for (auto i : m) {
     packer.pack(i.first);
@@ -451,6 +458,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
         options->meta_only = true;
       } else if (strcmp(arg, "bitmap") == 0) {
         options->bitmap = true;
+      } else if (strcmp(arg, "font-info") == 0) {
+        options->font_info = true;
       } else {
         if (file_exists(arg) && options->filename == "") {
           // It's a filename.
@@ -474,9 +483,9 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 }
 
 void usage() {
-  std::cerr
-      << "usage: pdf2msgpack [--bitmap] [--meta-only] [--pages=a-b] <filename>"
-      << std::endl;
+  std::cerr << "usage: pdf2msgpack [--font-info] [--bitmap] [--meta-only] "
+               "[--pages=a-b] <filename>"
+            << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -531,7 +540,7 @@ int main(int argc, char *argv[]) {
   const int output_format_version = 1;
   packer.pack(output_format_version);
 
-  dump_document_meta(options.filename, doc.get(), uMap);
+  dump_document_meta(options.filename, doc.get(), uMap, options);
   if (options.meta_only) {
     return 0;
   }
