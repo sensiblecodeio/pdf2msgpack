@@ -14,9 +14,10 @@ class Pdf2msgpack < Formula
                                  "--disable-syscall-filter",
                                  "--release"
     system "./waf", "install"
+    share.install "example"
   end
 
   test do
-    system "true"
+    system "#{bin}/pdf2msgpack", "#{share}/example/example.pdf"
   end
 end
