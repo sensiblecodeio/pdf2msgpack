@@ -483,7 +483,7 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 }
 
 void usage() {
-  std::cerr << "usage: pdf2msgpack [--font-info] [--bitmap] [--meta-only] "
+  std::cerr << "usage: pdf2msgpack [--bitmap] [--font-info] [--meta-only] "
                "[--pages=a-b] <filename>"
             << std::endl;
 }
