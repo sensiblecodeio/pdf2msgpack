@@ -47,6 +47,11 @@ def configure(ctx):
         "--std=c++14",
     ])
 
+    need_syscall_filter = not ctx.options.disable_syscall_filter
+    ctx.check_cxx(header_name="linux/seccomp.h",
+                  msg="Checking linux-headers & seccomp support",
+                  mandatory=need_syscall_filter)
+
     if ctx.options.release:
         ctx.env.append_value("CXXFLAGS", ["-O2"])
 
@@ -64,7 +69,9 @@ def configure(ctx):
         ctx.check_cfg(package='poppler', uselib_store='poppler',
                       args=['--cflags', '--libs', '--static'])
 
-        poppler_stlib = "fontconfig expat freetype lcms2 openjp2 jpeg png bz2 z pthread"
+        poppler_stlib = (
+            "fontconfig expat freetype lcms2 openjp2 jpeg png bz2 z pthread"
+        )
         for lib in poppler_stlib.split():
             ctx.check_cxx(stlib=lib, uselib_store='poppler')
 
@@ -74,19 +81,19 @@ def configure(ctx):
         ctx.check_cfg(package='poppler', uselib_store='poppler',
                       args=['--cflags', '--libs'])
 
-    ctx.check_cxx(header_name="linux/seccomp.h", msg="Checking linux-headers & seccomp support")
-
     ctx.check_cxx(header_name="poppler/PDFDoc.h", use="poppler",
                   msg="Checking libpoppler-private-dev (poppler configured " +
                       "with --enable-xpdf-headers)")
 
     if ctx.options.enable_syscall_reporter:
         ctx.env.append_value("CXXFLAGS", ["-DENABLE_SYSCALL_REPORTER"])
-        ctx.msg("Enable syscall reporter (***NOT FOR PRODUCTION***)", "yes")
+        ctx.msg("Enable syscall reporter (***NOT FOR PRODUCTION***)", "yes",
+                color="RED")
 
     if ctx.options.disable_syscall_filter:
         ctx.env.append_value("CXXFLAGS", ["-DDISABLE_SYSCALL_REPORTER"])
-        ctx.msg("Disable syscall filter (***NOT FOR PRODUCTION***)", "yes")
+        ctx.msg("Disable syscall filter (***NOT FOR PRODUCTION***)", "yes",
+                color="RED")
 
 
 def build(ctx):
@@ -95,9 +102,13 @@ def build(ctx):
     if ctx.env.BUILD_STATIC:
         features = 'static_linking'
 
+    sources = ctx.path.ant_glob('src/main.cpp')
+    if not ctx.options.disable_syscall_filter:
+        sources += ctx.path.ant_glob('src/syscall-reporter.c')
+
     ctx.program(
-        source=ctx.path.ant_glob('src/*.c*'),
-        target='pdf2msgpack',
+        source=sources,
+        target="pdf2msgpack",
         use="poppler",
         features=features,
         includes=["msgpack-c/include"],
