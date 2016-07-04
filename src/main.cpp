@@ -12,20 +12,21 @@
 #include <sys/prctl.h>
 #endif
 
-#include <poppler/DateInfo.h>
-#include <poppler/FontInfo.h>
-#include <poppler/Gfx.h>
-#include <poppler/GlobalParams.h>
-#include <poppler/PDFDoc.h>
-#include <poppler/Page.h>
-#include <poppler/SplashOutputDev.h>
-#include <poppler/TextOutputDev.h>
-#include <poppler/UTF.h>
-#include <poppler/UnicodeMap.h>
-#include <poppler/goo/GooList.h>
-#include <poppler/goo/GooString.h>
-#include <poppler/goo/gfile.h>
-#include <poppler/splash/SplashBitmap.h>
+// /usr/include/poppler/...
+#include <DateInfo.h>
+#include <FontInfo.h>
+#include <Gfx.h>
+#include <GlobalParams.h>
+#include <PDFDoc.h>
+#include <Page.h>
+#include <SplashOutputDev.h>
+#include <TextOutputDev.h>
+#include <UTF.h>
+#include <UnicodeMap.h>
+#include <goo/GooList.h>
+#include <goo/GooString.h>
+#include <goo/gfile.h>
+#include <splash/SplashBitmap.h>
 
 #include <msgpack.hpp>
 

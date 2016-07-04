@@ -82,7 +82,8 @@ def configure(ctx):
         ctx.check_cfg(package='poppler', uselib_store='poppler',
                       args=['--cflags', '--libs'])
 
-    ctx.check_cxx(header_name="poppler/PDFDoc.h", use="poppler",
+    # /usr/include/poppler/...
+    ctx.check_cxx(header_name="PDFDoc.h", use="poppler",
                   msg="Checking libpoppler-private-dev (poppler configured " +
                       "with --enable-xpdf-headers)")
 
