@@ -4,11 +4,13 @@
 #include <sstream>
 
 #include <libgen.h>
-#include <linux/seccomp.h>
 #include <stdio.h>
-#include <sys/prctl.h>
-
 #include <sys/stat.h>
+
+#ifndef DISABLE_SYSCALL_FILTER
+#include <linux/seccomp.h>
+#include <sys/prctl.h>
+#endif
 
 #include <poppler/DateInfo.h>
 #include <poppler/FontInfo.h>
@@ -34,17 +36,17 @@
 
 msgpack::packer<std::ostream> packer(&std::cout);
 
-#include "seccomp-bpf.h"
 #ifdef ENABLE_SYSCALL_REPORTER
+#include "seccomp-bpf.h"
 #include "syscall-reporter.h"
 #endif
 
 static int install_syscall_filter(void) {
-#ifdef DISABLE_SYSCALL_REPORTER
+#ifdef DISABLE_SYSCALL_FILTER
   if (true) {
     return 0;
   }
-#endif
+#else
   struct sock_filter filter[] = {
       /* Validate architecture. */
       VALIDATE_ARCHITECTURE,
@@ -81,6 +83,7 @@ static int install_syscall_filter(void) {
     exit(99);
   }
   return 0;
+#endif // else branch of #ifdef DISABLE_SYSCALL_FILTER
 }
 
 static std::string fmt(Object *o, UnicodeMap *uMap) {

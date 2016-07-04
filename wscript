@@ -42,6 +42,7 @@ def configure(ctx):
     ctx.env.append_value("CXXFLAGS", [
         "-g",
         "-Wall",
+        "-Wno-unused-private-field",
         "-Werror",
         "-ansi",
         "--std=c++14",
@@ -90,8 +91,9 @@ def configure(ctx):
         ctx.msg("Enable syscall reporter (***NOT FOR PRODUCTION***)", "yes",
                 color="RED")
 
-    if ctx.options.disable_syscall_filter:
-        ctx.env.append_value("CXXFLAGS", ["-DDISABLE_SYSCALL_REPORTER"])
+    ctx.env.DISABLE_SYSCALL_FILTER = ctx.options.disable_syscall_filter
+    if ctx.env.DISABLE_SYSCALL_FILTER:
+        ctx.env.append_value("CXXFLAGS", ["-DDISABLE_SYSCALL_FILTER"])
         ctx.msg("Disable syscall filter (***NOT FOR PRODUCTION***)", "yes",
                 color="RED")
 
@@ -103,8 +105,8 @@ def build(ctx):
         features = 'static_linking'
 
     sources = ctx.path.ant_glob('src/main.cpp')
-    if not ctx.options.disable_syscall_filter:
-        sources += ctx.path.ant_glob('src/syscall-reporter.c')
+    if not ctx.env.DISABLE_SYSCALL_FILTER:
+        sources += ctx.path.ant_glob('src/syscall-reporter.cpp')
 
     ctx.program(
         source=sources,
