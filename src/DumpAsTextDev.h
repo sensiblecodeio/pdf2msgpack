@@ -1,6 +1,7 @@
-#include <poppler/GfxFont.h>
-#include <poppler/GfxState.h>
-#include <poppler/OutputDev.h>
+// /usr/include/poppler/...
+#include <GfxFont.h>
+#include <GfxState.h>
+#include <OutputDev.h>
 
 #include "util.hpp"
 
