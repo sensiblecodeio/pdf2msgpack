@@ -116,10 +116,11 @@ public:
   bool meta_only;
   bool bitmap;
   bool font_info;
+  bool as_text;
 
   Options()
       : filename(""), start(0), end(0), meta_only(false), bitmap(false),
-        font_info(false) {}
+        font_info(false), as_text(false) {}
 
   bool range_specified() const { return start != 0 && end != 0; }
 
@@ -417,9 +418,29 @@ void dump_page(Page *page, const Options &options) {
 }
 
 void dump_document(PDFDoc *doc, const Options &options) {
-  // Pages are one-based in this API. Beware, 0 based elsewhere.
   for (int i = options.start; i <= options.end; i++) {
+    // Pages are one-based in this API. Beware, 0 based elsewhere.
     dump_page(doc->getPage(i), options);
+  }
+}
+
+void dump_page_as_text(Page *page) {
+  auto dev = std::make_unique<DumpAsTextDev>();
+
+  auto gfx = std::unique_ptr<Gfx>(
+      page->createGfx(dev.get(), 72.0, 72.0, 0, gFalse, /* useMediaBox */
+                      gTrue,                            /* Crop */
+                      -1, -1, -1, -1, gFalse,           /* printing */
+                      NULL, NULL));
+
+  page->display(gfx.get());
+  dev->endPage();
+}
+
+void dump_document_as_text(PDFDoc *doc, const Options &options) {
+  for (int i = options.start; i <= options.end; i++) {
+    // Pages are one-based in this API. Beware, 0 based elsewhere.
+    dump_page_as_text(doc->getPage(i));
   }
 }
 
@@ -486,6 +507,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
         options->bitmap = true;
       } else if (strcmp(arg, "font-info") == 0) {
         options->font_info = true;
+      } else if (strcmp(arg, "as-text") == 0) {
+        options->as_text = true;
       } else {
         if (file_exists(arg) && options->filename == "") {
           // It's a filename.
@@ -559,6 +582,11 @@ int main(int argc, char *argv[]) {
               << " (" << doc->getNumPages() << ")" << std::endl;
     usage();
     exit(1);
+  }
+
+  if (options.as_text) {
+    dump_document_as_text(doc.get(), options);
+    return 0;
   }
 
   // This version number should be incremented whenever the output format
