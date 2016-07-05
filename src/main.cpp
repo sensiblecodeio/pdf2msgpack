@@ -347,6 +347,117 @@ void dump_page_paths(Page *page) {
   dev->pack(std::cout);
 }
 
+class PathsOnlyDev : public SplashOutputDev {
+public:
+	PathsOnlyDev(SplashColorMode colorModeA, int bitmapRowPadA,
+			GBool reverseVideoA, SplashColorPtr paperColorA,
+			GBool bitmapTopDownA = gTrue,
+			SplashThinLineMode thinLineMode = splashThinLineDefault,
+			GBool overprintPreviewA = globalParams->getOverprintPreview())
+			: SplashOutputDev(colorModeA,
+		bitmapRowPadA,
+		reverseVideoA,
+		paperColorA,
+		bitmapTopDownA,
+		splashThinLineDefault, overprintPreviewA) {}
+
+  //----- text drawing
+  virtual void drawChar(GfxState *, double , double ,
+			double , double ,
+			double , double ,
+			CharCode , int , Unicode *, int ) {}
+  virtual GBool beginType3Char(GfxState *, double , double ,
+			       double , double ,
+			       CharCode , Unicode *, int ) { return gTrue; }
+  virtual void endType3Char(GfxState *) {}
+  virtual void beginTextObject(GfxState *) {}
+  virtual void endTextObject(GfxState *) {}
+
+  //----- image drawing
+  virtual void drawImageMask(GfxState *, Object *, Stream *,
+			     int , int , GBool ,
+			     GBool , GBool ) {}
+  virtual void setSoftMaskFromImageMask(GfxState *,
+					Object *, Stream *,
+					int , int , GBool ,
+					GBool , double *) {}
+  virtual void unsetSoftMaskFromImageMask(GfxState *, double *) {}
+  virtual void drawImage(GfxState *, Object *, Stream *,
+			 int , int , GfxImageColorMap *,
+			 GBool , int *, GBool ) {}
+  virtual void drawMaskedImage(GfxState *, Object *, Stream *,
+			       int , int ,
+			       GfxImageColorMap *,
+			       GBool ,
+			       Stream *, int , int ,
+			       GBool , GBool ) {}
+  virtual void drawSoftMaskedImage(GfxState *, Object *, Stream *,
+				   int , int ,
+				   GfxImageColorMap *,
+				   GBool ,
+				   Stream *,
+				   int , int ,
+				   GfxImageColorMap *,
+				   GBool ) {}
+};
+
+class TextOnlyDev : public SplashOutputDev {
+public:
+	TextOnlyDev(SplashColorMode colorModeA, int bitmapRowPadA,
+			GBool reverseVideoA, SplashColorPtr paperColorA,
+			GBool bitmapTopDownA = gTrue,
+			SplashThinLineMode thinLineMode = splashThinLineDefault,
+			GBool overprintPreviewA = globalParams->getOverprintPreview())
+			: SplashOutputDev(colorModeA,
+		bitmapRowPadA,
+		reverseVideoA,
+		paperColorA,
+		bitmapTopDownA,
+		splashThinLineDefault, overprintPreviewA) {}
+
+	//----- path painting
+	virtual void stroke(GfxState *) {}
+	virtual void fill(GfxState *) {}
+	virtual void eoFill(GfxState *) {}
+	virtual GBool tilingPatternFill(GfxState *, Gfx *, Catalog *, Object *,
+					double *, int , int , Dict *,
+					double *, double *,
+					int , int , int , int ,
+					double , double ) { return gFalse; }
+	virtual GBool functionShadedFill(GfxState *, GfxFunctionShading *) { return gFalse; }
+	virtual GBool axialShadedFill(GfxState *, GfxAxialShading *, double , double ) { return gFalse; }
+	virtual GBool radialShadedFill(GfxState *, GfxRadialShading *, double , double ) { return gFalse; }
+	virtual GBool gouraudTriangleShadedFill(GfxState *, GfxGouraudTriangleShading *) { return gFalse; }
+
+  //----- image drawing
+  virtual void drawImageMask(GfxState *, Object *, Stream *,
+			     int , int , GBool ,
+			     GBool , GBool ) {}
+  virtual void setSoftMaskFromImageMask(GfxState *,
+					Object *, Stream *,
+					int , int , GBool ,
+					GBool , double *) {}
+  virtual void unsetSoftMaskFromImageMask(GfxState *, double *) {}
+  virtual void drawImage(GfxState *, Object *, Stream *,
+			 int , int , GfxImageColorMap *,
+			 GBool , int *, GBool ) {}
+  virtual void drawMaskedImage(GfxState *, Object *, Stream *,
+			       int , int ,
+			       GfxImageColorMap *,
+			       GBool ,
+			       Stream *, int , int ,
+			       GBool , GBool ) {}
+  virtual void drawSoftMaskedImage(GfxState *, Object *, Stream *,
+				   int , int ,
+				   GfxImageColorMap *,
+				   GBool ,
+				   Stream *,
+				   int , int ,
+				   GfxImageColorMap *,
+				   GBool ) {}
+};
+
+template<class Renderer>
 void dump_page_bitmap(Page *page) {
   SplashColor paperColor;
   paperColor[0] = 255;
@@ -360,8 +471,8 @@ void dump_page_bitmap(Page *page) {
   // auto mode = splashModeRGB8;
   // const auto n_channels = 3;
 
-  auto dev = std::make_unique<SplashOutputDev>(mode, 4, gFalse, paperColor,
-                                               gTrue, splashThinLineShape);
+  auto dev = std::make_unique<Renderer>(mode, 4, gFalse, paperColor,
+                                            gTrue, splashThinLineSolid); //spashsplashThinLineShape);
 
   dev->setFontAntialias(true);
   dev->setVectorAntialias(true);
@@ -369,7 +480,7 @@ void dump_page_bitmap(Page *page) {
 
   page->display(dev.get(),
                 // TODO(pwaller): Parameterize resolution.
-                72.0 / 8, 72.0 / 8,
+                72.0 / 2, 72.0 / 2,
                 0,      // rotate
                 gFalse, /* useMediaBox */
                 gFalse, /* Crop */
@@ -412,7 +523,10 @@ void dump_page(Page *page, const Options &options) {
 
   if (options.bitmap) {
     packer.pack("Bitmap");
-    dump_page_bitmap(page);
+		packer.pack_array(3);
+		dump_page_bitmap<SplashOutputDev>(page);
+		dump_page_bitmap<TextOnlyDev>(page);
+		dump_page_bitmap<PathsOnlyDev>(page);
   }
 }
 
