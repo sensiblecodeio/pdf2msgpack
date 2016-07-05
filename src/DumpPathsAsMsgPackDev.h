@@ -85,11 +85,13 @@ struct pack<GfxRGB> {
 
 class DumpPathsAsMsgPackDev : public OutputDev {
 public:
-  DumpPathsAsMsgPackDev() : packer(buffer), path_count(0) {}
+  DumpPathsAsMsgPackDev() : packer(buffer), item_count(0) {}
 
   std::ostringstream buffer;
   msgpack::packer<std::ostream> packer;
-  int path_count;
+
+  // Number of items written to the stream.
+  int item_count;
 
   GfxRGB prevFillRGB = {0, 0, 0}, prevStrokeRGB = {0, 0, 0};
   double prevStrokeWidth;
@@ -102,7 +104,7 @@ public:
   // The path information is written to the `packer` and
   // the packed data is in this method streamed to `out`.
   void pack(std::ostream &out) {
-    msgpack::packer<std::ostream>(out).pack_array(path_count);
+    msgpack::packer<std::ostream>(out).pack_array(item_count);
     out << buffer.str();
   }
 
@@ -134,7 +136,7 @@ public:
           packer.pack_array(2);
           packer.pack_fix_uint8(SET_FILL_COLOR);
           packer.pack(curFillRGB);
-          path_count++;
+          item_count++;
         }
 
         // break;
@@ -148,7 +150,7 @@ public:
           packer.pack_array(2);
           packer.pack_fix_uint8(SET_STROKE_COLOR);
           packer.pack(curStrokeRGB);
-          path_count++;
+          item_count++;
         }
 
         double curStrokeWidth;
@@ -156,7 +158,7 @@ public:
         if (prevStrokeWidth != curStrokeWidth) {
           prevStrokeWidth = curStrokeWidth;
           packer.pack(std::make_tuple(SET_STROKE_WIDTH, curStrokeWidth));
-          path_count++;
+          item_count++;
         }
 
         break;
@@ -199,7 +201,7 @@ public:
           path_points.push_back(path_points[0]);
         }
         packer.pack(std::make_tuple(path_type, path_points));
-        path_count++;
+        item_count++;
       }
     }
   }
