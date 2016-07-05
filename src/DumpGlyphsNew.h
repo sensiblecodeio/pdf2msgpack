@@ -31,7 +31,11 @@ public:
 
     auto s = toUTF8(u, uLen);
 
-    packer.pack(s);
+    auto font = state->getFont();
+    double *m = state->getTextMat();
+    auto tm = std::make_tuple(m[0], m[1], m[2], m[3], m[4], m[5]);
+
+    packer.pack(std::make_tuple(tm, x, y, dx, dy, originX, originY, s));
     count++;
   }
 };
