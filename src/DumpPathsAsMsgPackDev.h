@@ -94,7 +94,7 @@ public:
   int item_count;
 
   GfxRGB prevFillRGB = {0, 0, 0}, prevStrokeRGB = {0, 0, 0};
-  double prevStrokeWidth;
+  double prevStrokeWidth = -1;
 
 public:
   // Writes the packed path information to a stream.
