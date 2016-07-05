@@ -8,8 +8,8 @@
 #include <sys/stat.h>
 
 #ifndef DISABLE_SYSCALL_FILTER
-#include <linux/seccomp.h>
-#include <sys/prctl.h>
+  #include <linux/seccomp.h>
+  #include <sys/prctl.h>
 #endif
 
 // /usr/include/poppler/...
@@ -37,9 +37,11 @@
 
 msgpack::packer<std::ostream> packer(&std::cout);
 
+#ifndef DISABLE_SYSCALL_FILTER
+  #include "seccomp-bpf.h"
+#endif
 #ifdef ENABLE_SYSCALL_REPORTER
-#include "seccomp-bpf.h"
-#include "syscall-reporter.h"
+  #include "syscall-reporter.h"
 #endif
 
 static int install_syscall_filter(void) {
