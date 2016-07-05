@@ -2,3 +2,7 @@ __pycache__
 .waf*/
 /build
 .lock-waf*
+/pdf2msgpack
+/pdf2msgpack.dbg
+*.msg
+*.png
