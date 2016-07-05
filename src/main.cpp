@@ -216,7 +216,7 @@ void dump_document_meta(const std::string filename, PDFDoc *doc,
   packer.pack(basename(const_cast<char *>(filename.c_str())));
 
   packer.pack("Pages");
-  packer.pack(doc->getNumPages());
+  packer.pack_fix_int64(doc->getNumPages());
 
   packer.pack("FontInfo");
   if (options.font_info) {
@@ -564,7 +564,7 @@ int main(int argc, char *argv[]) {
   // This version number should be incremented whenever the output format
   // is changed in a way which will break existing parsers.
   const int output_format_version = 1;
-  packer.pack(output_format_version);
+  packer.pack_uint32(output_format_version);
 
   dump_document_meta(options.filename, doc.get(), uMap, options);
   if (options.meta_only) {
