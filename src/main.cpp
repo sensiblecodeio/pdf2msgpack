@@ -60,7 +60,6 @@ static int install_syscall_filter(void) {
       ALLOW_SYSCALL(access),
       ALLOW_SYSCALL(fstatfs),
       ALLOW_SYSCALL(readlink),
-      ALLOW_SYSCALL(open),
       ALLOW_SYSCALL(close),
       ALLOW_SYSCALL(ioctl),
       ALLOW_SYSCALL(fcntl),
@@ -524,9 +523,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  install_syscall_filter();
-
-  auto file = open_file(options.filename);
 
   if (!globalParams) {
     globalParams = new GlobalParams("/usr/share/poppler");
@@ -536,6 +532,10 @@ int main(int argc, char *argv[]) {
   if (!(uMap = globalParams->getTextEncoding())) {
     exit(127);
   }
+
+  auto file = open_file(options.filename);
+
+  install_syscall_filter();
 
   std::unique_ptr<PDFDoc> doc(new PDFDoc(file));
   if (!doc) {
