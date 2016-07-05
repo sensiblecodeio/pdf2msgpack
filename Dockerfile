@@ -48,16 +48,6 @@ ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/fontconfig/build/in
 ENV LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/fontconfig/build/install/lib $LINKFLAGS"
 
 
-RUN cd vendor/github.com/mm2/Little-CMS/ \
- && mkdir build && cd build \
- && ../configure --prefix=$PWD/install --enable-static \
- && make -j5 \
- && make install
-
-ENV PKG_CONFIG_PATH="/src/vendor/github.com/mm2/Little-CMS/build/install/lib/pkgconfig:$PKG_CONFIG_PATH"
-ENV LINKFLAGS="-L/src/vendor/github.com/mm2/Little-CMS/build/install/lib $LINKFLAGS"
-
-
 RUN cd vendor/github.com/uclouvain/openjpeg/ \
  && mkdir build && cd build \
  && cmake .. -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PWD/install \
@@ -80,6 +70,7 @@ RUN cd vendor/anongit.freedesktop.org/git/poppler/poppler.git \
       --enable-static \
       --enable-build-type=release \
       --enable-xpdf-headers \
+      --disable-cms \
  && make V=1 \
  && make install
 
