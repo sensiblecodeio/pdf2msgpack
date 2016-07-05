@@ -14,6 +14,9 @@
 const int EO_FILL = 10;
 const int STROKE = 11;
 const int FILL = 12;
+const int SET_STROKE_COLOR = 13;
+const int SET_STROKE_WIDTH = 14;
+const int SET_FILL_COLOR = 15;
 
 typedef struct { double x, y; } Point;
 
@@ -50,6 +53,36 @@ public:
   }
 };
 
+bool operator!=(const GfxRGB &a, const GfxRGB &b) {
+  return !(a.r == b.r && a.g == b.g && a.b == b.b);
+}
+
+
+namespace msgpack {
+MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
+namespace adaptor {
+
+template <>
+struct pack<GfxRGB> {
+  template <typename Stream>
+  msgpack::packer<Stream>& operator()(msgpack::packer<Stream>& p, GfxRGB const &color) const {
+    auto c = [](const GfxColorComp x) -> uint8_t {
+      // 255 * x + 0.5  =  256 * x - x + 0x8000
+      return static_cast<uint8_t>(((x << 8) - x + 0x8000) >> 16);
+    };
+    p.pack_array(3);
+    p.pack_fix_uint8(c(color.r));
+    p.pack_fix_uint8(c(color.g));
+    p.pack_fix_uint8(c(color.b));
+    return p;
+  }
+};
+
+} // namespace adaptor
+} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
+} // namespace msgpack
+
+
 class DumpPathsAsMsgPackDev : public OutputDev {
 public:
   DumpPathsAsMsgPackDev() : packer(buffer), path_count(0) {}
@@ -57,6 +90,9 @@ public:
   std::ostringstream buffer;
   msgpack::packer<std::ostream> packer;
   int path_count;
+
+  GfxRGB prevFillRGB = {0, 0, 0}, prevStrokeRGB = {0, 0, 0};
+  double prevStrokeWidth;
 
 public:
   // Writes the packed path information to a stream.
@@ -75,28 +111,75 @@ public:
   GBool interpretType3Chars() { return gTrue; }
 
   void eoFill(GfxState *state) {
-    doPath(state->getCTM(), state->getPath(), EO_FILL);
+    doPath(state, state->getCTM(), state->getPath(), EO_FILL);
   }
 
   void stroke(GfxState *state) {
-    doPath(state->getCTM(), state->getPath(), STROKE);
+    doPath(state, state->getCTM(), state->getPath(), STROKE);
   }
 
   void fill(GfxState *state) {
-    doPath(state->getCTM(), state->getPath(), FILL);
+    doPath(state, state->getCTM(), state->getPath(), FILL);
   }
 
-  void doPath(const Mat2x3 &transform, GfxPath *path, int path_type) {
+  void recordStateChanges(GfxState *state, int path_type) {
+    switch (path_type) {
+
+      case FILL:
+      case EO_FILL:
+        GfxRGB curFillRGB;
+        state->getFillRGB(&curFillRGB);
+        if (prevFillRGB != curFillRGB) {
+          prevFillRGB = curFillRGB;
+          packer.pack_array(2);
+          packer.pack_fix_uint8(SET_FILL_COLOR);
+          packer.pack(curFillRGB);
+          path_count++;
+        }
+
+        // break;
+        // Fallthrough. Strokes apply to fills, too.
+
+      case STROKE:
+        GfxRGB curStrokeRGB;
+        state->getStrokeRGB(&curStrokeRGB);
+        if (prevStrokeRGB != curStrokeRGB) {
+          prevStrokeRGB = curStrokeRGB;
+          packer.pack_array(2);
+          packer.pack_fix_uint8(SET_STROKE_COLOR);
+          packer.pack(curStrokeRGB);
+          path_count++;
+        }
+
+        double curStrokeWidth;
+        curStrokeWidth = state->getLineWidth();
+        if (prevStrokeWidth != curStrokeWidth) {
+          prevStrokeWidth = curStrokeWidth;
+          packer.pack(std::make_tuple(SET_STROKE_WIDTH, curStrokeWidth));
+          path_count++;
+        }
+
+        break;
+
+      default:
+        std::cerr << "unknown path type: " << path_type << std::endl;
+
+    }
+  }
+
+  void doPath(GfxState *state, const Mat2x3 &transform, GfxPath *path, int path_type) {
+    recordStateChanges(state, path_type);
+
     auto n = path->getNumSubpaths();
 
     for (auto i = 0; i < n; ++i) {
       auto subpath = path->getSubpath(i);
       auto m = subpath->getNumPoints();
       auto j = 0;
+
       std::vector<PathPoint> path_points;
       while (j < m) {
         if (subpath->getCurve(j)) {
-
           auto a = transform.mul(subpath->getX(j + 0), subpath->getY(j + 0)),
                b = transform.mul(subpath->getX(j + 1), subpath->getY(j + 1)),
                c = transform.mul(subpath->getX(j + 2), subpath->getY(j + 2));
@@ -110,6 +193,7 @@ public:
         }
         ++j;
       }
+
       if (!path_points.empty()) {
         if (subpath->isClosed()) {
           path_points.push_back(path_points[0]);
