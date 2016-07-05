@@ -33,6 +33,7 @@
 #include "util.hpp"
 
 #include "DumpAsTextDev.h"
+#include "DumpGlyphsNew.h"
 #include "DumpPathsAsMsgPackDev.h"
 
 msgpack::packer<std::ostream> packer(&std::cout);
@@ -332,6 +333,20 @@ void dump_page_glyphs(Page *page) {
   dump_glyphs(word_list.get(), n_lines);
 }
 
+void dump_page_glyphs_new(Page *page) {
+  auto dev = std::make_unique<DumpGlyphsNew>();
+
+  auto gfx = std::unique_ptr<Gfx>(
+      page->createGfx(dev.get(), 72.0, 72.0, 0, gFalse, /* useMediaBox */
+                      gTrue,                            /* Crop */
+                      -1, -1, -1, -1, gFalse,           /* printing */
+                      NULL, NULL));
+
+  page->display(gfx.get());
+
+  dev->pack(std::cout);
+}
+
 void dump_page_paths(Page *page) {
   auto dev = std::make_unique<DumpPathsAsMsgPackDev>();
 
@@ -393,7 +408,7 @@ void dump_page_bitmap(Page *page) {
 }
 
 void dump_page(Page *page, const Options &options) {
-  int n = 3;
+  int n = 4; // Number of map entries to write
 
   if (options.bitmap) {
     n++;
@@ -406,6 +421,9 @@ void dump_page(Page *page, const Options &options) {
 
   packer.pack("Glyphs");
   dump_page_glyphs(page);
+
+  packer.pack("GlyphsNew");
+  dump_page_glyphs_new(page);
 
   packer.pack("Paths");
   dump_page_paths(page);
