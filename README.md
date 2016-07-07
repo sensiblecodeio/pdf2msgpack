@@ -37,7 +37,42 @@ make
 
 `pdf2msgpack` writes its output to [msgpack](http://msgpack.org), which is a convenient, fast serialization format with libraries available in many languages.
 
-The format is in flux and the best way to find out about it is to run `pdf2msgpack` and look at the output in python with `msgpack.load()`.
+Here is a description of the wire format.
+
+At the top level the document is not a list but consecutive objects written to
+the stream.
+
+```
+document (consecutive objects): <wire version : int> <metadata> <page>...
+
+metadata (dict): {
+  "Pages": int,
+  "FileName": str,
+  "FontInfo": [<fontinfo : dict>...],
+  (other string fields supplied in PDF),
+}
+
+page (dict): {
+  "Size": [<width : int>, <height : int>],
+  "Glyphs": [<glyph>...],
+  "Paths": [<pathitem>...],
+}
+
+pathitem (list): [<type : (EO_FILL|STROKE|FILL|SET_STROKE_COLOR|
+                           SET_STROKE_WIDTH|SET_FILL_COLOR)>,
+                  [<pathdata>...]]
+
+pathdata (list): depending on pathitem type
+  EO_FILL, FILL, STROKE: pathcoord
+  SET_FILL_COLOR: [<r : uint8>, <g : uint8>, <b : uint8>]
+  SET_STROKE_WIDTH: <width : float>
+
+pathcoord (2 list or 6 list):
+  point: [<x : float>, <y : float>]
+  quadratic curve: [<a : float>, <b : float>, <c : float>, <d : float>, <e : float>, <f : float>]
+
+fontinfo (dict): {<Name> <Type> <Encoding> <Embedded> <Subset> <ToUnicode>}
+```
 
 # Licence
 
