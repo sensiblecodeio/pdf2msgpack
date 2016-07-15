@@ -427,12 +427,12 @@ func (z *Meta) DecodeMsg(dc *msgp.Reader) (err error) {
 					return
 				}
 				if cap(*z.FontInfo) >= int(zcxo) {
-					*z.FontInfo = *z.FontInfo[:zcxo]
+					*z.FontInfo = (*z.FontInfo)[:zcxo]
 				} else {
 					*z.FontInfo = make(FontInfos, zcxo)
 				}
 				for zpks := range *z.FontInfo {
-					err = *z.FontInfo[zpks].DecodeMsg(dc)
+					err = (*z.FontInfo)[zpks].DecodeMsg(dc)
 					if err != nil {
 						return
 					}
@@ -503,7 +503,7 @@ func (z *Meta) EncodeMsg(en *msgp.Writer) (err error) {
 			return
 		}
 		for zpks := range *z.FontInfo {
-			err = *z.FontInfo[zpks].EncodeMsg(en)
+			err = (*z.FontInfo)[zpks].EncodeMsg(en)
 			if err != nil {
 				return
 			}
@@ -535,7 +535,7 @@ func (z *Meta) MarshalMsg(b []byte) (o []byte, err error) {
 	} else {
 		o = msgp.AppendArrayHeader(o, uint32(len(*z.FontInfo)))
 		for zpks := range *z.FontInfo {
-			o, err = *z.FontInfo[zpks].MarshalMsg(o)
+			o, err = (*z.FontInfo)[zpks].MarshalMsg(o)
 			if err != nil {
 				return
 			}
@@ -597,12 +597,12 @@ func (z *Meta) UnmarshalMsg(bts []byte) (o []byte, err error) {
 					return
 				}
 				if cap(*z.FontInfo) >= int(zrsw) {
-					*z.FontInfo = *z.FontInfo[:zrsw]
+					*z.FontInfo = (*z.FontInfo)[:zrsw]
 				} else {
 					*z.FontInfo = make(FontInfos, zrsw)
 				}
 				for zpks := range *z.FontInfo {
-					bts, err = *z.FontInfo[zpks].UnmarshalMsg(bts)
+					bts, err = (*z.FontInfo)[zpks].UnmarshalMsg(bts)
 					if err != nil {
 						return
 					}
@@ -627,7 +627,7 @@ func (z *Meta) Msgsize() (s int) {
 	} else {
 		s += msgp.ArrayHeaderSize
 		for zpks := range *z.FontInfo {
-			s += *z.FontInfo[zpks].Msgsize()
+			s += (*z.FontInfo)[zpks].Msgsize()
 		}
 	}
 	return
