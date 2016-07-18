@@ -2,6 +2,7 @@ package p2m
 
 import (
 	"io"
+	"time"
 
 	"github.com/tinylib/msgp/msgp"
 )
@@ -15,7 +16,8 @@ type Reader struct {
 	Version int
 	Meta    Meta
 
-	R *msgp.Reader
+	bcr *byteCountReader
+	R   *msgp.Reader
 
 	currentNumber int
 }
@@ -41,6 +43,9 @@ type FontInfo struct {
 
 // Page represents one page of a PDF.
 type Page struct {
+	Bytes         int64 // Number of bytes of MsgPack
+	ParseDuration time.Duration
+
 	Number int // One based.
 	Size   Size
 	Glyphs []Glyph
@@ -93,10 +98,23 @@ const (
 	PathTypeSetFillColor = 15
 )
 
+type byteCountReader struct {
+	io.Reader
+	n int64
+}
+
+func (bcr *byteCountReader) Read(p []byte) (int, error) {
+	n, err := bcr.Reader.Read(p)
+	bcr.n += int64(n)
+	return n, err
+}
+
 // NewReader reads the header and metadata from a pdf2msgpack stream.
 // To read pages, call Next() repeatedly until io.EOF.
 func NewReader(r io.Reader) (*Reader, error) {
-	reader := &Reader{R: msgp.NewReader(struct{ io.Reader }{r})}
+	bcr := &byteCountReader{Reader: r}
+	decoder := msgp.NewReader(bcr)
+	reader := &Reader{R: decoder, bcr: bcr}
 
 	var err error
 	reader.Version, err = reader.R.ReadInt()
@@ -112,10 +130,20 @@ func NewReader(r io.Reader) (*Reader, error) {
 	return reader, nil
 }
 
+func (r *Reader) position() int64 {
+	return r.bcr.n - int64(r.R.Buffered())
+}
+
 // Next reads the next page into p, or returns io.EOF.
 func (r *Reader) Next(p *Page) error {
 	r.currentNumber++ // Increment first for one-based counting.
 	p.Number = r.currentNumber
+
+	startTime := time.Now()
+	start := r.position()
+
 	err := p.DecodeMsg(r.R)
+	p.ParseDuration = time.Since(startTime)
+	p.Bytes = r.position() - start
 	return err
 }
