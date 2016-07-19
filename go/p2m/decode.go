@@ -78,7 +78,7 @@ func (p *Path) DecodeMsg(dc *msgp.Reader) (err error) {
 
 	err = p.Type.DecodeMsg(dc)
 	if err != nil {
-		return err
+		return
 	}
 
 	switch p.Type {
