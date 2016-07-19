@@ -28,15 +28,14 @@ func main() {
 	}
 
 	var p p2m.Page
-loop:
+
 	for {
 		err := r.Next(&p)
-		switch err {
-		default:
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
 			log.Fatal(err)
-		case io.EOF:
-			break loop
-		case nil:
 		}
 
 		log.Printf("Page i=%v s=%v len(paths)=%d len(glyphs)=%d", p.Number, p.Size, len(p.Paths), len(p.Glyphs))
