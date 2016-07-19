@@ -1,8 +1,8 @@
 class Pdf2msgpack < Formula
   desc "Efficiently export PDF content in an easily machine readable format"
   homepage "https://github.com/scraperwiki/pdf2msgpack"
-  url "https://github.com/scraperwiki/pdf2msgpack/archive/v0.2.tar.gz"
-  sha256 "302416b7bcd73eb0f3d66cd019525e10e2ebc53341dd0bee6edb91850ff61a5e"
+  url "https://github.com/scraperwiki/pdf2msgpack/archive/v0.3.0.tar.gz"
+  sha256 "7ec23dac37fcaf09adef3cafc0cad2ac4bdee93c7de59516af267202b9458fd5"
   head "https://github.com/scraperwiki/pdf2msgpack.git"
 
   depends_on "pkg-config" => :build
