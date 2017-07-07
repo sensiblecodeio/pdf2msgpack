@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.6
 
 RUN apk add --no-cache \
       autoconf \
@@ -16,6 +16,7 @@ RUN apk add --no-cache \
       py-lxml \
       py-six \
       python3 \
+      python \
       zlib-dev
 
 COPY ./vendor /src/vendor
@@ -64,6 +65,7 @@ RUN cd vendor/github.com/uclouvain/openjpeg/ \
  && make -j5 \
  && make install
 
+ENV PKG_CONFIG_PATH="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib/pkgconfig:$PKG_CONFIG_PATH"
 ENV CXXFLAGS="-I/src/vendor/github.com/uclouvain/openjpeg/build/install/include $CXXFLAGS"
 ENV LDFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LDFLAGS"
 ENV LINKFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LINKFLAGS"
@@ -80,6 +82,7 @@ RUN cd vendor/anongit.freedesktop.org/git/poppler/poppler.git \
       --enable-static \
       --enable-build-type=release \
       --enable-xpdf-headers \
+      --enable-libopenjpeg=openjpeg2 \
  && make V=1 \
  && make install
 
