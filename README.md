@@ -48,6 +48,7 @@ document (consecutive objects): <wire version : int> <metadata> <page>...
 metadata (dict): {
   "Pages": int,
   "FileName": str,
+  "XFA": dict,
   "FontInfo": [<fontinfo : dict>...],
   (other string fields supplied in PDF),
 }
