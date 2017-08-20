@@ -14,6 +14,7 @@
 
 // /usr/include/poppler/...
 #include <DateInfo.h>
+#include <FileSpec.h>
 #include <FontInfo.h>
 #include <Gfx.h>
 #include <GlobalParams.h>
@@ -118,10 +119,11 @@ public:
   bool bitmap;
   bool font_info;
   bool xfa;
+  bool embedded_files;
 
   Options()
       : filename(""), start(0), end(0), meta_only(false), bitmap(false),
-        font_info(false), xfa(false) {}
+        font_info(false), xfa(false), embedded_files(false) {}
 
   bool range_specified() const { return start != 0 && end != 0; }
 
@@ -206,6 +208,13 @@ void pack_stream_content(Stream *stream) {
   packer.pack_bin_body(content.getCString(), content.getLength());
 }
 
+void pack_string(GooString *string) {
+  if (!string || string->getLength() <= 0)
+    packer.pack_nil();
+  else
+    packer.pack(string->getCString());
+}
+
 void dump_meta_xfa(Catalog *catalog, UnicodeMap *uMap) {
   Object xfa;
   catalog->getAcroForm()->dictLookup("XFA", &xfa);
@@ -234,6 +243,22 @@ void dump_meta_xfa(Catalog *catalog, UnicodeMap *uMap) {
   }
 }
 
+void dump_meta_embedded_files(Catalog *catalog) {
+  packer.pack_array(catalog->numEmbeddedFiles());
+  for (int i = 0; i < catalog->numEmbeddedFiles(); i++) {
+    FileSpec *spec = catalog->embeddedFile(i);
+    EmbFile *file = spec->getEmbeddedFile();
+
+    packer.pack_array(6);
+    pack_string(spec->getFileName());
+    pack_string(spec->getDescription());
+    pack_string(file->mimeType());
+    pack_string(file->createDate());
+    pack_string(file->modDate());
+    pack_stream_content(file->stream());
+  }
+}
+
 void dump_document_meta(const std::string filename, PDFDoc *doc,
                         UnicodeMap *uMap, const Options &options) {
   Catalog *catalog = doc->getCatalog();
@@ -252,7 +277,7 @@ void dump_document_meta(const std::string filename, PDFDoc *doc,
 
   // Use packer.pack_map rather than pack(m) so we can write pages as an
   // integer.
-  packer.pack_map(4 + m.size());
+  packer.pack_map(5 + m.size());
 
   packer.pack("FileName");
   packer.pack(basename(const_cast<char *>(filename.c_str())));
@@ -270,6 +295,13 @@ void dump_document_meta(const std::string filename, PDFDoc *doc,
   packer.pack("XFA");
   if (options.xfa && catalog->getFormType() == Catalog::FormType::XfaForm) {
     dump_meta_xfa(catalog, uMap);
+  } else {
+    packer.pack_nil();
+  }
+
+  packer.pack("EmbeddedFiles");
+  if (options.embedded_files) {
+    dump_meta_embedded_files(catalog);
   } else {
     packer.pack_nil();
   }
@@ -537,6 +569,8 @@ std::string parse_options(int argc, char *argv[], Options *options) {
         options->font_info = true;
       } else if (strcmp(arg, "xfa") == 0) {
         options->xfa = true;
+      } else if (strcmp(arg, "embedded-files") == 0) {
+        options->embedded_files = true;
       } else {
         if (file_exists(arg) && options->filename == "") {
           // It's a filename.
@@ -561,7 +595,7 @@ std::string parse_options(int argc, char *argv[], Options *options) {
 
 void usage() {
   std::cerr << "usage: pdf2msgpack [--bitmap] [--font-info] [--meta-only] "
-               "[--xfa] [--pages=a-b] <filename>"
+               "[--xfa] [--embedded-files] [--pages=a-b] <filename>"
             << std::endl;
 }
 

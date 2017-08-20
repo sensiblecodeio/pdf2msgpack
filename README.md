@@ -49,6 +49,7 @@ metadata (dict): {
   "Pages": int,
   "FileName": str,
   "XFA": dict,
+  "EmbeddedFiles": [<embedfile>...],
   "FontInfo": [<fontinfo : dict>...],
   (other string fields supplied in PDF),
 }
@@ -58,6 +59,10 @@ page (dict): {
   "Glyphs": [<glyph>...],
   "Paths": [<pathitem>...],
 }
+
+embedfile (list):
+  [ <name : str>, <description : str>, <mime-type : str>,
+    <created-date : str>, <modified-date : str>, <content : bin>]
 
 pathitem (list): [<type : (EO_FILL|STROKE|FILL|SET_STROKE_COLOR|
                            SET_STROKE_WIDTH|SET_FILL_COLOR)>,
