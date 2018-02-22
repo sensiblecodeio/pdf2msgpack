@@ -206,7 +206,7 @@ void pack_stream_content(Stream *stream) {
   packer.pack_bin_body(content.getCString(), content.getLength());
 }
 
-void pack_string(GooString *string) {
+void pack_string(const GooString *string) {
   if (!string || string->getLength() <= 0)
     packer.pack_nil();
   else
