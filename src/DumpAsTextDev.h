@@ -544,21 +544,6 @@ public:
     return OutputDev::psXObject(A, B);
   }
 
-  void startProfile() {
-    printf("startProfile\n");
-    return OutputDev::startProfile();
-  }
-
-  GooHash *getProfileHash() {
-    printf("getProfileHash\n");
-    return OutputDev::getProfileHash();
-  }
-
-  GooHash *endProfile() {
-    printf("endProfile\n");
-    return OutputDev::endProfile();
-  }
-
   GBool checkTransparencyGroup(GfxState *A, GBool B) {
     printf("checkTransparencyGroup\n");
     return OutputDev::checkTransparencyGroup(A, B);

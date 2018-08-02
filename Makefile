@@ -1,3 +1,5 @@
+all: submodules pdf2msgpack
+
 pdf2msgpack: pdf2msgpack.dbg
 	strip --strip-debug -o pdf2msgpack pdf2msgpack.dbg
 
@@ -20,4 +22,7 @@ release: pdf2msgpack
 fmt:
 	clang-format -i src/*.cpp src/*.h
 
-.PHONY: .FORCE build-container
+submodules: .FORCE
+	git submodule update --init
+
+.PHONY: .FORCE build-container submodules
