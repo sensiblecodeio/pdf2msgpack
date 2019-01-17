@@ -125,7 +125,7 @@ COPY --chown=nobody:nogroup waf wscript .
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    ./waf configure --static --release
+    ./waf configure --static --release || { cat build/config.log; exit 1; }
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
