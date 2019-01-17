@@ -393,7 +393,7 @@ void dump_page_glyphs(Page *page) {
   int n_lines;
   auto deleter = [&](GooList **lines) {
     for (int i = 0; i < n_lines; i++) {
-      deleteGooList(lines[i], TextWordSelection);
+      deleteGooList<TextWordSelection>(lines[i]);
     }
     gfree(lines);
   };

@@ -96,12 +96,12 @@ public:
     return OutputDev::cvtUserToDev(ux, uy, dx, dy);
   }
 
-  double *getDefCTM() {
+  const double *getDefCTM() {
     printf("getDefCTM\n");
     return OutputDev::getDefCTM();
   }
 
-  double *getDefICTM() {
+  const double *getDefICTM() {
     printf("getDefICTM\n");
     return OutputDev::getDefICTM();
   }
