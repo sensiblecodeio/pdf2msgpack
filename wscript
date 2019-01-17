@@ -84,7 +84,7 @@ def configure(ctx):
     # /usr/include/poppler/...
     ctx.check_cxx(header_name="PDFDoc.h", use="poppler",
                   msg="Checking libpoppler-private-dev (poppler configured " +
-                      "with --enable-xpdf-headers)")
+                      "with ENABLE_UNSTABLE_API_ABI_HEADERS=ON)")
 
     if ctx.options.enable_syscall_reporter:
         ctx.env.append_value("CXXFLAGS", ["-DENABLE_SYSCALL_REPORTER"])

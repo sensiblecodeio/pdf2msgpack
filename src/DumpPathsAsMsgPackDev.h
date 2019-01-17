@@ -106,9 +106,9 @@ public:
     out << buffer.str();
   }
 
-  GBool upsideDown() { return gTrue; }
-  GBool useDrawChar() { return gTrue; }
-  GBool interpretType3Chars() { return gTrue; }
+  bool upsideDown() { return true; }
+  bool useDrawChar() { return true; }
+  bool interpretType3Chars() { return true; }
 
   void eoFill(GfxState *state) {
     doPath(state, state->getCTM(), state->getPath(), EO_FILL);
