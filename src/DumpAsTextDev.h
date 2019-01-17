@@ -9,46 +9,46 @@
 // (Or see poppler/OutputDev.h).
 class DumpAsTextDev : public OutputDev {
 public:
-  GBool upsideDown() { return gTrue; }
+  bool upsideDown() { return true; }
 
-  GBool useDrawChar() { return gTrue; }
+  bool useDrawChar() { return true; }
 
-  GBool useTilingPatternFill() {
+  bool useTilingPatternFill() {
     printf("useTilingPatternFill\n");
     return OutputDev::useTilingPatternFill();
   }
 
-  GBool useShadedFills(int type) {
+  bool useShadedFills(int type) {
     printf("useShadedFills\n");
     return OutputDev::useShadedFills(type);
   }
 
-  GBool useFillColorStop() {
+  bool useFillColorStop() {
     printf("useFillColorStop\n");
     return OutputDev::useFillColorStop();
   }
 
-  GBool useDrawForm() {
+  bool useDrawForm() {
     printf("useDrawForm\n");
     return OutputDev::useDrawForm();
   }
 
-  GBool interpretType3Chars() {
+  bool interpretType3Chars() {
     printf("interpretType3Chars\n");
-    return gTrue;
+    return true;
   }
 
-  GBool needNonText() {
+  bool needNonText() {
     printf("needNonText\n");
     return OutputDev::needNonText();
   }
 
-  GBool needCharCount() {
+  bool needCharCount() {
     printf("needCharCount\n");
     return OutputDev::needCharCount();
   }
 
-  GBool needClipToCropBox() {
+  bool needClipToCropBox() {
     printf("needClipToCropBox\n");
     return OutputDev::needClipToCropBox();
   }
@@ -58,11 +58,11 @@ public:
     return OutputDev::setDefaultCTM(ctm);
   }
 
-  GBool checkPageSlice(Page *page, double hDPI, double vDPI, int rotate,
-                       GBool useMediaBox, GBool crop, int sliceX, int sliceY,
-                       int sliceW, int sliceH, GBool printing,
-                       GBool (*abortCheckCbk)(void *), void *abortCheckCbkData,
-                       GBool (*annotDisplayDecideCbk)(Annot *, void *),
+  bool checkPageSlice(Page *page, double hDPI, double vDPI, int rotate,
+                       bool useMediaBox, bool crop, int sliceX, int sliceY,
+                       int sliceW, int sliceH, bool printing,
+                       bool (*abortCheckCbk)(void *), void *abortCheckCbkData,
+                       bool (*annotDisplayDecideCbk)(Annot *, void *),
                        void *annotDisplayDecideCbkData) {
     printf("checkPageSlice\n");
     return OutputDev::checkPageSlice(
@@ -96,12 +96,12 @@ public:
     return OutputDev::cvtUserToDev(ux, uy, dx, dy);
   }
 
-  double *getDefCTM() {
+  const double *getDefCTM() {
     printf("getDefCTM\n");
     return OutputDev::getDefCTM();
   }
 
-  double *getDefICTM() {
+  const double *getDefICTM() {
     printf("getDefICTM\n");
     return OutputDev::getDefICTM();
   }
@@ -314,7 +314,7 @@ public:
     return OutputDev::eoFill(A);
   }
 
-  GBool tilingPatternFill(GfxState *A, Gfx *B, Catalog *C, Object *D, double *E,
+  bool tilingPatternFill(GfxState *A, Gfx *B, Catalog *C, Object *D, double *E,
                           int F, int G, Dict *H, double *I, double *J, int K,
                           int L, int M, int N, double O, double P) {
     printf("tilingPatternFill\n");
@@ -322,38 +322,38 @@ public:
                                         N, O, P);
   }
 
-  GBool functionShadedFill(GfxState *A, GfxFunctionShading *B) {
+  bool functionShadedFill(GfxState *A, GfxFunctionShading *B) {
     printf("functionShadedFill\n");
     return OutputDev::functionShadedFill(A, B);
   }
 
-  GBool axialShadedFill(GfxState *A, GfxAxialShading *B, double C, double D) {
+  bool axialShadedFill(GfxState *A, GfxAxialShading *B, double C, double D) {
     printf("axialShadedFill\n");
     return OutputDev::axialShadedFill(A, B, C, D);
   }
 
-  GBool axialShadedSupportExtend(GfxState *A, GfxAxialShading *B) {
+  bool axialShadedSupportExtend(GfxState *A, GfxAxialShading *B) {
     printf("axialShadedSupportExtend\n");
     return OutputDev::axialShadedSupportExtend(A, B);
   }
 
-  GBool radialShadedFill(GfxState *A, GfxRadialShading *B, double C, double D) {
+  bool radialShadedFill(GfxState *A, GfxRadialShading *B, double C, double D) {
     printf("radialShadedFill\n");
     return OutputDev::radialShadedFill(A, B, C, D);
   }
 
-  GBool radialShadedSupportExtend(GfxState *A, GfxRadialShading *B) {
+  bool radialShadedSupportExtend(GfxState *A, GfxRadialShading *B) {
     printf("radialShadedSupportExtend\n");
     return OutputDev::radialShadedSupportExtend(A, B);
   }
 
-  GBool gouraudTriangleShadedFill(GfxState *state,
+  bool gouraudTriangleShadedFill(GfxState *state,
                                   GfxGouraudTriangleShading *shading) {
     printf("gouraudTriangleShadedFill\n");
     return OutputDev::gouraudTriangleShadedFill(state, shading);
   }
 
-  GBool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) {
+  bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) {
     printf("patchMeshShadedFill\n");
     return OutputDev::patchMeshShadedFill(state, shading);
   }
@@ -406,7 +406,7 @@ public:
     return OutputDev::drawString(A, B);
   }
 
-  GBool beginType3Char(GfxState *A, double B, double C, double D, double E,
+  bool beginType3Char(GfxState *A, double B, double C, double D, double E,
                        CharCode F, Unicode *G, int H) {
     printf("beginType3Char\n");
     return OutputDev::beginType3Char(A, B, C, D, E, F, G, H);
@@ -443,16 +443,16 @@ public:
   }
 
   void drawImageMask(GfxState *state, Object *ref, Stream *str, int width,
-                     int height, GBool invert, GBool interpolate,
-                     GBool inlineImg) {
+                     int height, bool invert, bool interpolate,
+                     bool inlineImg) {
     printf("drawImageMask\n");
     return OutputDev::drawImageMask(state, ref, str, width, height, invert,
                                     interpolate, inlineImg);
   }
 
   void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
-                                int width, int height, GBool invert,
-                                GBool inlineImg, double *baseMatrix) {
+                                int width, int height, bool invert,
+                                bool inlineImg, double *baseMatrix) {
     printf("setSoftMaskFromImageMask\n");
     return OutputDev::setSoftMaskFromImageMask(state, ref, str, width, height,
                                                invert, inlineImg, baseMatrix);
@@ -464,8 +464,8 @@ public:
   }
 
   void drawImage(GfxState *state, Object *ref, Stream *str, int width,
-                 int height, GfxImageColorMap *colorMap, GBool interpolate,
-                 int *maskColors, GBool inlineImg) {
+                 int height, GfxImageColorMap *colorMap, bool interpolate,
+                 int *maskColors, bool inlineImg) {
     printf("drawImage\n");
     return OutputDev::drawImage(state, ref, str, width, height, colorMap,
                                 interpolate, maskColors, inlineImg);
@@ -473,9 +473,9 @@ public:
 
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width,
                        int height, GfxImageColorMap *colorMap,
-                       GBool interpolate, Stream *maskStr, int maskWidth,
-                       int maskHeight, GBool maskInvert,
-                       GBool maskInterpolate) {
+                       bool interpolate, Stream *maskStr, int maskWidth,
+                       int maskHeight, bool maskInvert,
+                       bool maskInterpolate) {
     printf("drawMaskedImage\n");
     return OutputDev::drawMaskedImage(state, ref, str, width, height, colorMap,
                                       interpolate, maskStr, maskWidth,
@@ -484,9 +484,9 @@ public:
 
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width,
                            int height, GfxImageColorMap *colorMap,
-                           GBool interpolate, Stream *maskStr, int maskWidth,
+                           bool interpolate, Stream *maskStr, int maskWidth,
                            int maskHeight, GfxImageColorMap *maskColorMap,
-                           GBool maskInterpolate) {
+                           bool maskInterpolate) {
     printf("drawSoftMaskedImage\n");
     return OutputDev::drawSoftMaskedImage(
         state, ref, str, width, height, colorMap, interpolate, maskStr,
@@ -544,13 +544,13 @@ public:
     return OutputDev::psXObject(A, B);
   }
 
-  GBool checkTransparencyGroup(GfxState *A, GBool B) {
+  bool checkTransparencyGroup(GfxState *A, bool B) {
     printf("checkTransparencyGroup\n");
     return OutputDev::checkTransparencyGroup(A, B);
   }
 
-  void beginTransparencyGroup(GfxState *A, double *B, GfxColorSpace *C, GBool D,
-                              GBool E, GBool F) {
+  void beginTransparencyGroup(GfxState *A, double *B, GfxColorSpace *C, bool D,
+                              bool E, bool F) {
     printf("beginTransparencyGroup\n");
     return OutputDev::beginTransparencyGroup(A, B, C, D, E, F);
   }
@@ -565,7 +565,7 @@ public:
     return OutputDev::paintTransparencyGroup(A, B);
   }
 
-  void setSoftMask(GfxState *A, double *B, GBool C, Function *D, GfxColor *E) {
+  void setSoftMask(GfxState *A, double *B, bool C, Function *D, GfxColor *E) {
     printf("setSoftMask\n");
     return OutputDev::setSoftMask(A, B, C, D, E);
   }
@@ -580,12 +580,12 @@ public:
     return OutputDev::processLink(A);
   }
 
-  GBool getVectorAntialias() {
+  bool getVectorAntialias() {
     printf("getVectorAntialias\n");
     return OutputDev::getVectorAntialias();
   }
 
-  void setVectorAntialias(GBool A) {
+  void setVectorAntialias(bool A) {
     printf("setVectorAntialias\n");
     return OutputDev::setVectorAntialias(A);
   }

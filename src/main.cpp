@@ -176,13 +176,13 @@ void dump_font_info(PDFDoc *doc) {
     packer.pack_map(6);
 
     packer.pack("Name");
-    packer.pack(font->getName() ? font->getName()->getCString() : "[none]");
+    packer.pack(font->getName() ? font->getName()->toStr() : "[none]");
 
     packer.pack("Type");
     packer.pack(fontTypeNames[font->getType()]);
 
     packer.pack("Encoding");
-    packer.pack(font->getEncoding()->getCString());
+    packer.pack(font->getEncoding()->toStr());
 
     packer.pack("Embedded");
     packer.pack(font->getEmbedded());
@@ -203,14 +203,14 @@ void pack_stream_content(Stream *stream) {
   stream->close();
 
   packer.pack_bin(content.getLength());
-  packer.pack_bin_body(content.getCString(), content.getLength());
+  packer.pack_bin_body(content.toStr().c_str(), content.getLength());
 }
 
 void pack_string(const GooString *string) {
   if (!string || string->getLength() <= 0)
     packer.pack_nil();
   else
-    packer.pack(string->getCString());
+    packer.pack(string->toStr());
 }
 
 void dump_meta_xfa(Catalog *catalog, UnicodeMap *uMap) {
@@ -311,12 +311,12 @@ void TextPageDecRef(TextPage *text_page) { text_page->decRefCnt(); }
 typedef std::unique_ptr<TextPage, decltype(&TextPageDecRef)> TextPagePtr;
 
 TextPagePtr page_to_text_page(Page *page) {
-  auto dev = std::make_unique<TextOutputDev>(nullptr, gTrue, 0, gFalse, gFalse);
+  auto dev = std::make_unique<TextOutputDev>(nullptr, true, 0, false, false);
 
   auto gfx = std::unique_ptr<Gfx>(
-      page->createGfx(dev.get(), 72.0, 72.0, 0, gFalse, /* useMediaBox */
-                      gTrue,                            /* Crop */
-                      -1, -1, -1, -1, gFalse,           /* printing */
+      page->createGfx(dev.get(), 72.0, 72.0, 0, false, /* useMediaBox */
+                      true,                            /* Crop */
+                      -1, -1, -1, -1, false,           /* printing */
                       NULL, NULL));
 
   page->display(gfx.get());
@@ -393,7 +393,7 @@ void dump_page_glyphs(Page *page) {
   int n_lines;
   auto deleter = [&](GooList **lines) {
     for (int i = 0; i < n_lines; i++) {
-      deleteGooList(lines[i], TextWordSelection);
+      deleteGooList<TextWordSelection>(lines[i]);
     }
     gfree(lines);
   };
@@ -411,9 +411,9 @@ void dump_page_paths(Page *page) {
   auto dev = std::make_unique<DumpPathsAsMsgPackDev>();
 
   auto gfx = std::unique_ptr<Gfx>(
-      page->createGfx(dev.get(), 72.0, 72.0, 0, gFalse, /* useMediaBox */
-                      gTrue,                            /* Crop */
-                      -1, -1, -1, -1, gFalse,           /* printing */
+      page->createGfx(dev.get(), 72.0, 72.0, 0, false, /* useMediaBox */
+                      true,                            /* Crop */
+                      -1, -1, -1, -1, false,           /* printing */
                       NULL, NULL));
 
   page->display(gfx.get());
@@ -435,8 +435,8 @@ void dump_page_bitmap(Page *page) {
   // auto mode = splashModeRGB8;
   // const auto n_channels = 3;
 
-  auto dev = std::make_unique<SplashOutputDev>(mode, 4, gFalse, paperColor,
-                                               gTrue, splashThinLineShape);
+  auto dev = std::make_unique<SplashOutputDev>(mode, 4, false, paperColor,
+                                               true, splashThinLineShape);
 
   dev->setFontAntialias(true);
   dev->setVectorAntialias(true);
@@ -446,9 +446,9 @@ void dump_page_bitmap(Page *page) {
                 // TODO(pwaller): Parameterize resolution.
                 72.0 / 8, 72.0 / 8,
                 0,      // rotate
-                gFalse, /* useMediaBox */
-                gFalse, /* Crop */
-                gFalse, /* printing */
+                false, /* useMediaBox */
+                false, /* Crop */
+                false, /* printing */
                 NULL, NULL);
 
   auto bitmap = dev->getBitmap();
@@ -506,7 +506,7 @@ BaseStream *open_file(const std::string filename) {
     exit(5);
   }
   Object obj;
-  return new FileStream(file, 0, gFalse, file->size(), Object(objNull));
+  return new FileStream(file, 0, false, file->size(), Object(objNull));
 }
 
 std::string parse_page_range(std::string value, Options *options) {

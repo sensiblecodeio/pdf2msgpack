@@ -13,7 +13,7 @@ pdf2msgpack.dbg: build-container
 	@echo "Wrote pdf2msgpack.dbg"
 
 build-container: Dockerfile src/main.cpp
-	docker build -t pdf2msgpack .
+	DOCKER_BUILDKIT=1 docker build -t pdf2msgpack .
 
 release: pdf2msgpack
 	./release.sh
