@@ -308,6 +308,17 @@ void dump_document_meta(const std::string filename, PDFDoc *doc,
 
 void TextPageDecRef(TextPage *text_page) { text_page->decRefCnt(); }
 
+void render_annotations(std::unique_ptr<Gfx> &gfx, Annots *annots) {
+  gfx->saveState();
+
+  for (auto i = 0; i < annots->getNumAnnots(); i++) {
+    auto *annot = annots->getAnnot(i);
+    annot->draw(gfx.get(), false);
+  }
+
+  gfx->restoreState();
+}
+
 typedef std::unique_ptr<TextPage, decltype(&TextPageDecRef)> TextPagePtr;
 
 TextPagePtr page_to_text_page(Page *page) {
@@ -319,7 +330,14 @@ TextPagePtr page_to_text_page(Page *page) {
                       -1, -1, -1, -1, false,           /* printing */
                       NULL, NULL));
 
+  gfx->saveState();
   page->display(gfx.get());
+  gfx->restoreState();
+
+  // Note: page->getAnnots() contains form fields, so this has the effect of
+  // rendering form fields.
+  render_annotations(gfx, page->getAnnots());
+
   dev->endPage();
 
   return TextPagePtr(dev->takeText(), TextPageDecRef);
