@@ -25,6 +25,7 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       gperf \
       libjpeg-turbo-dev \
       libpng-dev \
+      libpng-static \
       libtool \
       linux-headers \
       py-lxml \
