@@ -1,10 +1,10 @@
 # syntax = docker/dockerfile:experimental
 
-FROM alpine:3.10 AS cachebase
+FROM alpine:3.11 AS cachebase
 RUN mkdir -p /tmp/ccache \
  && chown nobody:nogroup /tmp/ccache
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 ARG BUILD_CONCURRENCY=4
 
@@ -16,14 +16,17 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       automake \
       build-base \
       bzip2-dev \
+      bzip2-static \
       cmake \
       ccache \
       expat-dev \
+      expat-static \
       gettext-dev \
       gettext-static \
       git \
       gperf \
       libjpeg-turbo-dev \
+      libjpeg-turbo-static \
       libpng-dev \
       libpng-static \
       libtool \
@@ -33,7 +36,8 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       python3 \
       python \
       util-linux-dev \
-      zlib-dev
+      zlib-dev \
+      zlib-static
 
 ENV PATH=/usr/lib/ccache/bin:$PATH \
     CCACHE_DIR=/tmp/ccache
