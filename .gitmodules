@@ -13,3 +13,6 @@
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
 	url = http://anongit.freedesktop.org/git/poppler/poppler.git
+[submodule "vendor/github.com/msgpack/msgpack-c"]
+	path = vendor/github.com/msgpack/msgpack-c
+	url = https://github.com/msgpack/msgpack-c
