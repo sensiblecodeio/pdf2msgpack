@@ -1,0 +1,28 @@
+name: CI Build
+on:
+  push:
+    branches:
+      master
+  pull_request:
+
+jobs:
+  build:
+    name: Build and run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up submodules
+        run: |
+          make submodules
+
+      - name: Build
+        run: |
+          make
+
+      # Not a rigorous test, but a quick check to ensure the build at least runs.
+      - name: Run and check output
+        run: |
+          diff <(./pdf2msgpack --meta-only example/example.pdf) example/example-meta-only.msg

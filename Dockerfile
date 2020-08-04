@@ -1,10 +1,10 @@
 # syntax = docker/dockerfile:experimental
 
-FROM alpine:3.8 AS cachebase
+FROM alpine:3.12 AS cachebase
 RUN mkdir -p /tmp/ccache \
  && chown nobody:nogroup /tmp/ccache
 
-FROM alpine:3.8
+FROM alpine:3.12
 
 ARG BUILD_CONCURRENCY=4
 
@@ -16,23 +16,28 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       automake \
       build-base \
       bzip2-dev \
+      bzip2-static \
       cmake \
       ccache \
       expat-dev \
+      expat-static \
       gettext-dev \
       gettext-static \
       git \
       gperf \
       libjpeg-turbo-dev \
+      libjpeg-turbo-static \
       libpng-dev \
+      libpng-static \
       libtool \
       linux-headers \
       py-lxml \
       py-six \
+      python2 \
       python3 \
-      python \
       util-linux-dev \
-      zlib-dev
+      zlib-dev \
+      zlib-static
 
 ENV PATH=/usr/lib/ccache/bin:$PATH \
     CCACHE_DIR=/tmp/ccache
@@ -120,7 +125,6 @@ ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git
 
 
 COPY --chown=nobody:nogroup ./src /src/src
-COPY --chown=nobody:nogroup msgpack-c msgpack-c
 COPY --chown=nobody:nogroup waf wscript .
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
