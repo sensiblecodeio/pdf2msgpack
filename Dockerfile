@@ -125,7 +125,6 @@ ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git
 
 
 COPY --chown=nobody:nogroup ./src /src/src
-COPY --chown=nobody:nogroup msgpack-c msgpack-c
 COPY --chown=nobody:nogroup waf wscript .
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
