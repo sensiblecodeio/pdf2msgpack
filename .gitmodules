@@ -1,9 +1,9 @@
 [submodule "vendor/git.savannah.gnu.org/r/freetype/freetype2.git"]
 	path = vendor/git.savannah.gnu.org/r/freetype/freetype2.git
-	url = http://git.savannah.gnu.org/r/freetype/freetype2.git
+	url = https://git.savannah.gnu.org/r/freetype/freetype2.git
 [submodule "vendor/anongit.freedesktop.org/git/fontconfig"]
 	path = vendor/anongit.freedesktop.org/git/fontconfig
-	url = http://anongit.freedesktop.org/git/fontconfig
+	url = https://anongit.freedesktop.org/git/fontconfig
 [submodule "vendor/github.com/mm2/Little-CMS"]
 	path = vendor/github.com/mm2/Little-CMS
 	url = https://github.com/mm2/Little-CMS
@@ -12,7 +12,7 @@
 	url = https://github.com/uclouvain/openjpeg
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
-	url = http://anongit.freedesktop.org/git/poppler/poppler.git
+	url = https://anongit.freedesktop.org/git/poppler/poppler.git
 [submodule "vendor/github.com/msgpack/msgpack-c"]
 	path = vendor/github.com/msgpack/msgpack-c
 	url = https://github.com/msgpack/msgpack-c
