@@ -7,7 +7,7 @@ import (
 
 	"github.com/kr/pretty"
 
-	"github.com/scraperwiki/pdf2msgpack/go/p2m"
+	"github.com/sensiblecodeio/pdf2msgpack/go/pkg/p2m"
 )
 
 func main() {

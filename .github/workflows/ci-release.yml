@@ -12,8 +12,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '~1.14.6'
+
+      - name: Build p2m-reader
+        run: |
+          cd ./go && go install ./cmd/p2m-reader
+
+      - name: Run p2m-reader and check output
+        run: |
+          p2m-reader < example/example-meta-only.msg 2>&1 | grep -q "Microsoft"
       
-      - name: Build project
+      - name: Build pdf2msgpack
         run: |
           make
 
