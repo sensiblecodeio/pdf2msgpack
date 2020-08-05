@@ -37,7 +37,7 @@ jobs:
           draft: true
           prerelease: false
       
-      - name: Upload Release Asset
+      - name: Upload Linux binary
         id: upload-linux-binary
         uses: actions/upload-release-asset@v1
         env:
