@@ -26,7 +26,7 @@ jobs:
         run: |
           p2m-reader < example/example-meta-only.msg 2>&1 | grep -q "Microsoft"
       
-      - name: Build project
+      - name: Build pdf2msgpack
         run: |
           make
 
