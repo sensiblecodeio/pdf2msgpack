@@ -24,7 +24,7 @@ jobs:
 
       - name: Calculate SHA256
         run: |
-          sha256sum pdf2msgpack > SHA256SUMS
+          sha256sum pdf2msgpack pdf2msgpack.dbg > SHA256SUMS
 
       - name: Create Release
         id: create_release
@@ -46,6 +46,17 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./pdf2msgpack
           asset_name: pdf2msgpack
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux debug symbols
+        id: upload-debug-symbols
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pdf2msgpack.dbg
+          asset_name: pdf2msgpack.dbg
           asset_content_type: application/octet-stream
 
       - name: Upload SHA256SUMS to GitHub
