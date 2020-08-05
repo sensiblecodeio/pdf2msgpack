@@ -1,0 +1,60 @@
+on:
+  push:
+    tags:
+    - 'v*'
+
+name: CI Release
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Build project
+        run: |
+          make
+
+      # Not a rigorous test, but a quick check to ensure the build at least runs.
+      - name: Run and check output
+        run: |
+          diff <(./pdf2msgpack --meta-only example/example.pdf) example/example-meta-only.msg
+
+      - name: Calculate SHA256
+        run: |
+          sha256sum pdf2msgpack > SHA256SUMS
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
+      
+      - name: Upload Release Asset
+        id: upload-linux-binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pdf2msgpack
+          asset_name: pdf2msgpack
+          asset_content_type: application/octet-stream
+
+      - name: Upload SHA256SUMS to GitHub
+        id: upload-sha256sums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./SHA256SUMS
+          asset_name: SHA256SUMS
+          asset_content_type: text/plain
