@@ -27,10 +27,6 @@ jobs:
         run: |
           p2m-reader < example/example-meta-only.msg 2>&1 | grep -q "Microsoft"
 
-      - name: Set up submodules
-        run: |
-          make submodules
-
       - name: Build pdf2msgpack
         run: |
           make
