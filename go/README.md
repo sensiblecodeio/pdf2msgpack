@@ -9,8 +9,7 @@ Installation
 
 To install the `p2m-reader` run:
 
-    go get -u github.com/tinylib/msgp/msgp github.com/kr/pretty
-    go install ./p2m-reader
+    go install ./cmd/p2m-reader
 
 
 Usage
