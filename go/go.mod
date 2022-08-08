@@ -1,6 +1,6 @@
 module github.com/sensiblecodeio/pdf2msgpack/go
 
-go 1.14
+go 1.19
 
 require (
 	github.com/kr/pretty v0.2.1
