@@ -25,7 +25,6 @@
 #include <TextOutputDev.h>
 #include <UTF.h>
 #include <UnicodeMap.h>
-#include <goo/GooList.h>
 #include <goo/GooString.h>
 #include <goo/gfile.h>
 #include <splash/SplashBitmap.h>
@@ -161,7 +160,7 @@ static const char *fontTypeNames[] = {
 
 void dump_font_info(PDFDoc *doc) {
   FontInfoScanner scanner(doc, 0);
-  GooList *fonts = scanner.scan(doc->getNumPages());
+  std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
 
   if (!fonts) {
     packer.pack_nil();
@@ -343,7 +342,7 @@ TextPagePtr page_to_text_page(Page *page) {
   return TextPagePtr(dev->takeText(), TextPageDecRef);
 }
 
-int count_glyphs(GooList **lines, int n_lines) {
+int count_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
   int total_glyphs = 0;
 
   for (int i = 0; i < n_lines; i++) {
@@ -358,10 +357,10 @@ int count_glyphs(GooList **lines, int n_lines) {
   return total_glyphs;
 }
 
-void dump_glyphs(GooList **lines, int n_lines) {
+void dump_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
   // Lines
   for (int i = 0; i < n_lines; i++) {
-    GooList *line_words = lines[i];
+    std::vector<TextWordSelection*> *line_words = lines[i];
 
     // Words
     for (int j = 0; j < line_words->getLength(); j++) {
@@ -409,13 +408,16 @@ void dump_page_glyphs(Page *page) {
   PDFRectangle whole_page(-inf, -inf, inf, inf);
 
   int n_lines;
-  auto deleter = [&](GooList **lines) {
+  auto deleter = [&](std::vector<TextWordSelection*> **lines) {
     for (int i = 0; i < n_lines; i++) {
-      deleteGooList<TextWordSelection>(lines[i]);
+      for (auto item : *(lines[i])) {
+        delete item;
+      }
+      delete lines[i];
     }
     gfree(lines);
   };
-  auto word_list = std::unique_ptr<GooList *, decltype(deleter)>(
+  auto word_list = std::unique_ptr<std::vector<TextWordSelection*> *, decltype(deleter)>(
       text->getSelectionWords(&whole_page, selectionStyleGlyph, &n_lines),
       deleter);
 
