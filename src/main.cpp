@@ -33,7 +33,6 @@
 
 #include "util.hpp"
 
-#include "DumpAsTextDev.h"
 #include "DumpPathsAsMsgPackDev.h"
 
 msgpack::packer<std::ostream> packer(&std::cout);
