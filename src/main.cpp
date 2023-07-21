@@ -308,8 +308,7 @@ void TextPageDecRef(TextPage *text_page) { text_page->decRefCnt(); }
 void render_annotations(std::unique_ptr<Gfx> &gfx, Annots *annots) {
   gfx->saveState();
 
-  for (auto i = 0; i < annots->getNumAnnots(); i++) {
-    auto *annot = annots->getAnnot(i);
+  for (Annot *annot : annots->getAnnots()) {
     annot->draw(gfx.get(), false);
   }
 
