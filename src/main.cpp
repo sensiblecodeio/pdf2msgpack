@@ -160,18 +160,33 @@ static const char *fontTypeNames[] = {
 
 void dump_font_info(PDFDoc *doc) {
   FontInfoScanner scanner(doc, 0);
-  std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
+  // Original:
+  // std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
+  // Use const?
+  // const std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
+  // Now remove pointer:
+  // const std::vector<FontInfo*> fonts = scanner.scan(doc->getNumPages());
+  const std::vector<FontInfo*> fonts = scanner.scan(doc->getNumPages());
 
-  if (!fonts) {
+  // Original:
+  // if (!fonts) {
+  // Maybe:
+  // if (fonts.empty()) {
+  if (fonts.empty()) {
     packer.pack_nil();
     return;
   }
 
-  packer.pack_array(fonts->size());
+  // Original:
+  // packer.pack_array(fonts->size());
+  packer.pack_array(fonts.size());
 
-  for (std::size_t i = 1; i < fonts->size(); ++i) {
-    auto font = reinterpret_cast<FontInfo *>((*fonts)[i]);
+  // Original
+  // for (std::size_t i = 1; i < fonts->size(); ++i) {
 
+  for (FontInfo* font : fonts) {
+    // Original:
+    // auto font = reinterpret_cast<FontInfo *>((*fonts)[i]);
     packer.pack_map(6);
 
     packer.pack("Name");
