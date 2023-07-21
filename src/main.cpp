@@ -140,7 +140,7 @@ static std::string fmt(const Object &o, const UnicodeMap *uMap) {
 
   char buf[9];
   Unicode *u;
-  auto len = TextStringToUCS4(s, &u);
+  auto len = TextStringToUCS4(s->toStr(), &u);
 
   std::string out;
   out.reserve(static_cast<size_t>(len));
@@ -179,7 +179,7 @@ void dump_font_info(PDFDoc *doc) {
     packer.pack(fontTypeNames[font->getType()]);
 
     packer.pack("Encoding");
-    packer.pack(font->getEncoding()->toStr());
+    packer.pack(font->getEncoding());
 
     packer.pack("Embedded");
     packer.pack(font->getEmbedded());
