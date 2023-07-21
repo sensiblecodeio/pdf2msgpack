@@ -173,7 +173,7 @@ void dump_font_info(PDFDoc *doc) {
     packer.pack_map(6);
 
     packer.pack("Name");
-    packer.pack(font->getName() ? font->getName()->toStr() : "[none]");
+    packer.pack(font->getName().value_or("[none]"));
 
     packer.pack("Type");
     packer.pack(fontTypeNames[font->getType()]);
@@ -239,7 +239,7 @@ void dump_meta_xfa(Catalog *catalog, const UnicodeMap *uMap) {
 void dump_meta_embedded_files(Catalog *catalog) {
   packer.pack_array(catalog->numEmbeddedFiles());
   for (int i = 0; i < catalog->numEmbeddedFiles(); i++) {
-    FileSpec *spec = catalog->embeddedFile(i);
+    std::unique_ptr<FileSpec> spec = catalog->embeddedFile(i);
     EmbFile *file = spec->getEmbeddedFile();
 
     packer.pack_array(6);
