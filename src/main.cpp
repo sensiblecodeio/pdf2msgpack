@@ -365,7 +365,8 @@ int count_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
     total_glyphs += words->size() - 1; // spaces
     for (std::size_t j = 0; j < words->size(); j++) {
       auto *x = reinterpret_cast<TextWordSelection *>((*words)[j]);
-      auto *word = reinterpret_cast<TextWord *>(x->getWord());
+      // Is this right?
+      auto *word = x->getWord();
       total_glyphs += word->getLength();
     }
   }
@@ -380,7 +381,7 @@ void dump_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
     // Words
     for (std::size_t j = 0; j < line_words->size(); j++) {
       auto word_sel = reinterpret_cast<TextWordSelection *>((*line_words)[j]);
-      TextWord *word = word_sel->getWord();
+      const TextWord *word = word_sel->getWord();
 
       // Glyphs
       for (int k = 0; k < word->getLength(); k++) {
@@ -642,7 +643,7 @@ int main(int argc, char *argv[]) {
   auto file = open_file(options.filename);
 
   if (!globalParams) {
-    globalParams = new GlobalParams("/usr/share/poppler");
+    globalParams = std::make_unique<GlobalParams>("/usr/share/poppler");
   }
 
   UnicodeMap *uMap;
