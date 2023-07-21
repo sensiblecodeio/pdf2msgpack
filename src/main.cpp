@@ -523,13 +523,13 @@ BaseStream *open_file(const std::string filename) {
   // Original
   // GooString goo_filename(filename.c_str());
   // auto file = GooFile::open(&goo_filename);
-  auto file = GooFile::open(filename);
+  std::unique_ptr<GooFile> file = GooFile::open(filename);
   if (file == NULL) {
     std::cerr << "Failed to open " << filename << std::endl;
     exit(5);
   }
   Object obj;
-  return new FileStream(file, 0, false, file->size(), Object(objNull));
+  return new FileStream(file.release(), 0, false, file->size(), Object(objNull));
 }
 
 std::string parse_page_range(std::string value, Options *options) {
