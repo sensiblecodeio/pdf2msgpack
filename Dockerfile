@@ -116,8 +116,8 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make V=1 -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib64/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib64 $LINKFLAGS" \
+ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib $LINKFLAGS" \
     CXXFLAGS="-I/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/include $CXXFLAGS"
 
 
