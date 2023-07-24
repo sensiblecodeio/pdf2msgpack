@@ -1,10 +1,10 @@
 # syntax = docker/dockerfile:experimental
 
-FROM alpine:3.13 AS cachebase
+FROM alpine:3.18 AS cachebase
 RUN mkdir -p /tmp/ccache \
  && chown nobody:nogroup /tmp/ccache
 
-FROM alpine:3.13
+FROM alpine:3.18
 
 ARG BUILD_CONCURRENCY=4
 
