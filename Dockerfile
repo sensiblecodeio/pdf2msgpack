@@ -100,7 +100,7 @@ ENV PKG_CONFIG_PATH="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib
     CXXFLAGS="-I/src/vendor/github.com/uclouvain/openjpeg/build/install/include $CXXFLAGS" \
     LDFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib64 $LDFLAGS" \
     LINKFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib64 $LINKFLAGS" \
-    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib64/cmake/openjpeg-2.5"
+    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib64/openjpeg-2.5"
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
