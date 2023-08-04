@@ -314,12 +314,10 @@ public:
     return OutputDev::eoFill(A);
   }
 
-  bool tilingPatternFill(GfxState *A, Gfx *B, Catalog *C, Object *D, double *E,
-                          int F, int G, Dict *H, double *I, double *J, int K,
-                          int L, int M, int N, double O, double P) {
+  bool tilingPatternFill(GfxState *A, Gfx *B, Catalog *C, GfxTilingPattern *D, double *E,
+                          int F, int G, int H, int I, double J, double K) {
     printf("tilingPatternFill\n");
-    return OutputDev::tilingPatternFill(A, B, C, D, E, F, G, H, I, J, K, L, M,
-                                        N, O, P);
+    return OutputDev::tilingPatternFill(A, B, C, D, E, F, G, H, I, J, K);
   }
 
   bool functionShadedFill(GfxState *A, GfxFunctionShading *B) {
