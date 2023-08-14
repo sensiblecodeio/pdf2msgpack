@@ -45,7 +45,6 @@ def configure(ctx):
         "-Werror",
         "-ansi",
         "--std=c++14",
-        "-DMSGPACK_NO_BOOST",
     ])
 
     need_syscall_filter = not ctx.options.disable_syscall_filter
