@@ -1,5 +1,5 @@
-[submodule "vendor/gitlab.freedesktop.org/freetype/freetype.git"]
-	path = vendor/gitlab.freedesktop.org/freetype/freetype.git
+[submodule "vendor/git.savannah.gnu.org/r/freetype/freetype2.git"]
+	path = vendor/git.savannah.gnu.org/r/freetype/freetype2.git
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "vendor/anongit.freedesktop.org/git/fontconfig"]
 	path = vendor/anongit.freedesktop.org/git/fontconfig
