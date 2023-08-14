@@ -31,6 +31,8 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       libpng-static \
       libtool \
       linux-headers \
+      py-six \
+      python2 \
       python3 \
       util-linux-dev \
       zlib-dev \
