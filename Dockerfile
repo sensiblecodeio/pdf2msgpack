@@ -1,10 +1,10 @@
 # syntax = docker/dockerfile:experimental
 
-FROM alpine:3.18 AS cachebase
+FROM alpine:3.12 AS cachebase
 RUN mkdir -p /tmp/ccache \
  && chown nobody:nogroup /tmp/ccache
 
-FROM alpine:3.18
+FROM alpine:3.12
 
 ARG BUILD_CONCURRENCY=4
 
@@ -31,6 +31,9 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       libpng-static \
       libtool \
       linux-headers \
+      py-lxml \
+      py-six \
+      python2 \
       python3 \
       util-linux-dev \
       zlib-dev \
@@ -45,7 +48,7 @@ USER nobody:nogroup
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    cd vendor/gitlab.freedesktop.org/freetype/freetype.git/ \
+    cd vendor/git.savannah.gnu.org/r/freetype/freetype2.git/ \
  && NOCONFIGURE=1 ./autogen.sh \
  # workaround for docker #9547 (Text file busy) \
  && sync \
@@ -54,10 +57,10 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib $LINKFLAGS" \
+ENV PKG_CONFIG_PATH="/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib $LINKFLAGS" \
     # Required for poppler cmake \
-    FREETYPE_DIR=/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install
+    FREETYPE_DIR=/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
@@ -97,7 +100,7 @@ ENV PKG_CONFIG_PATH="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib
     CXXFLAGS="-I/src/vendor/github.com/uclouvain/openjpeg/build/install/include $CXXFLAGS" \
     LDFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LDFLAGS" \
     LINKFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LINKFLAGS" \
-    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib/cmake/openjpeg-2.5"
+    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib/openjpeg-2.3"
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
@@ -116,8 +119,8 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make V=1 -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib $LINKFLAGS" \
+ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib64/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib64 $LINKFLAGS" \
     CXXFLAGS="-I/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/include $CXXFLAGS"
 
 

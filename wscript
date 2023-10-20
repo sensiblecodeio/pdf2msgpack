@@ -6,7 +6,7 @@ from waflib.TaskGen import after_method, feature
 
 
 @feature('static_linking')
-@after_method('apply_link', 'propagate_uselib_vars')
+@after_method('apply_link')
 def force_static_linking(self):
     env = self.link_task.env
     env.STLIB += env.LIB
@@ -45,7 +45,6 @@ def configure(ctx):
         "-Werror",
         "-ansi",
         "--std=c++14",
-        "-DMSGPACK_NO_BOOST",
     ])
 
     need_syscall_filter = not ctx.options.disable_syscall_filter
@@ -114,5 +113,5 @@ def build(ctx):
         target="pdf2msgpack",
         use="poppler",
         features=features,
-        includes=["vendor/github.com/sensiblecodeio/msgpack-c/include"],
+        includes=["vendor/github.com/msgpack/msgpack-c/include"],
     )

@@ -1,6 +1,6 @@
-[submodule "vendor/gitlab.freedesktop.org/freetype/freetype.git"]
-	path = vendor/gitlab.freedesktop.org/freetype/freetype.git
-	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "vendor/git.savannah.gnu.org/r/freetype/freetype2.git"]
+	path = vendor/git.savannah.gnu.org/r/freetype/freetype2.git
+	url = https://git.savannah.gnu.org/r/freetype/freetype2.git
 [submodule "vendor/anongit.freedesktop.org/git/fontconfig"]
 	path = vendor/anongit.freedesktop.org/git/fontconfig
 	url = https://anongit.freedesktop.org/git/fontconfig
@@ -13,7 +13,6 @@
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
 	url = https://anongit.freedesktop.org/git/poppler/poppler.git
-[submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
-	path = vendor/github.com/sensiblecodeio/msgpack-c
-	url = https://github.com/sensiblecodeio/msgpack-c
-	branch = cpp-6.1.0-with-4.1.1-float-double-behaviour
+[submodule "vendor/github.com/msgpack/msgpack-c"]
+	path = vendor/github.com/msgpack/msgpack-c
+	url = https://github.com/msgpack/msgpack-c
