@@ -185,13 +185,26 @@ public:
                c = transform.mul(subpath->getX(j + 2), subpath->getY(j + 2));
 
           path_points.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
+          // Consider replacing this with j += 3 in future.
+          // See the associated commit message or #154 for a full explanation.
+          // Poppler's own code iterates using j += 3 for subpath curves.
+          //
+          // This is a hack to keep the behaviour of pdf2msgpack close to what it was,
+          // but with reproducible output.
+          // The current result is that the first point of the curve gets acted on as previously,
+          // the second point of the curve no longer incorrectly adds another curve point,
+          // but the final point does get included as a standalone point
+          // (the final point also gets handled by the else block below).
+          // Including the final point as a standalone point may not be strictly correct,
+          // but more closely retains the previous behaviour.
+          j += 2;
         } else {
           auto x = subpath->getX(j), y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
           path_points.push_back(PathPoint(t.x, t.y));
+          ++j;
         }
-        ++j;
       }
 
       if (!path_points.empty()) {
