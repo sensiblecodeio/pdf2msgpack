@@ -179,7 +179,16 @@ public:
 
       std::vector<PathPoint> path_points;
       while (j < m) {
-        if (subpath->getCurve(j)) {
+        // Consider removing the bounds end check: j < m - 2
+        // This should not be necessary with the j += 2 increment,
+        // but is an extra safeguard to ensure we do not end up accessing
+        // the uninitialised part of arrays.
+        // If the number of points, m, is, say, 10,
+        // we need to stop at point 8 to ensure we don't exceed point 10
+        // because we access the second value beyond 8.
+        // This actually corresponds to j = 7 as j is 0-indexed,
+        // that is, j must be less than m - 2.
+        if (subpath->getCurve(j) && (j < m - 2)) {
           auto a = transform.mul(subpath->getX(j + 0), subpath->getY(j + 0)),
                b = transform.mul(subpath->getX(j + 1), subpath->getY(j + 1)),
                c = transform.mul(subpath->getX(j + 2), subpath->getY(j + 2));
