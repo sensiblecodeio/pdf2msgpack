@@ -179,19 +179,41 @@ public:
 
       std::vector<PathPoint> path_points;
       while (j < m) {
-        if (subpath->getCurve(j)) {
+        // Consider removing the bounds end check: j < m - 2
+        // This should not be necessary with the j += 2 increment,
+        // but is an extra safeguard to ensure we do not end up accessing
+        // the uninitialised part of arrays.
+        // If the number of points, m, is, say, 10,
+        // we need to stop at point 8 to ensure we don't exceed point 10
+        // because we access the second value beyond 8.
+        // This actually corresponds to j = 7 as j is 0-indexed,
+        // that is, j must be less than m - 2.
+        if (subpath->getCurve(j) && (j < m - 2)) {
           auto a = transform.mul(subpath->getX(j + 0), subpath->getY(j + 0)),
                b = transform.mul(subpath->getX(j + 1), subpath->getY(j + 1)),
                c = transform.mul(subpath->getX(j + 2), subpath->getY(j + 2));
 
           path_points.push_back(PathPoint(a.x, a.y, b.x, b.y, c.x, c.y));
+          // Consider replacing this with j += 3 in future.
+          // See the associated commit message or #154 for a full explanation.
+          // Poppler's own code iterates using j += 3 for subpath curves.
+          //
+          // This is a hack to keep the behaviour of pdf2msgpack close to what it was,
+          // but with reproducible output.
+          // The current result is that the first point of the curve gets acted on as previously,
+          // the second point of the curve no longer incorrectly adds another curve point,
+          // but the final point does get included as a standalone point
+          // (the final point also gets handled by the else block below).
+          // Including the final point as a standalone point may not be strictly correct,
+          // but more closely retains the previous behaviour.
+          j += 2;
         } else {
           auto x = subpath->getX(j), y = subpath->getY(j);
 
           auto t = transform.mul(x, y);
           path_points.push_back(PathPoint(t.x, t.y));
+          ++j;
         }
-        ++j;
       }
 
       if (!path_points.empty()) {
