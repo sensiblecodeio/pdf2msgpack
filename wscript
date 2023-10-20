@@ -6,7 +6,7 @@ from waflib.TaskGen import after_method, feature
 
 
 @feature('static_linking')
-@after_method('apply_link')
+@after_method('apply_link', 'propagate_uselib_vars')
 def force_static_linking(self):
     env = self.link_task.env
     env.STLIB += env.LIB
