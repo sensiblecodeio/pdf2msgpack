@@ -23,6 +23,6 @@ fmt:
 	clang-format -i src/*.cpp src/*.h
 
 submodules: .FORCE
-	git submodule update --init
+	git submodule update --init --recursive
 
 .PHONY: .FORCE build-container submodules
