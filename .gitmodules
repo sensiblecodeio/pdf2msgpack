@@ -13,3 +13,7 @@
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
 	url = https://anongit.freedesktop.org/git/poppler/poppler.git
+[submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
+	path = vendor/github.com/sensiblecodeio/msgpack-c
+	url = https://github.com/sensiblecodeio/msgpack-c
+	branch = cpp-6.1.0-with-4.1.1-float-double-behaviour
