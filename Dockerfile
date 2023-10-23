@@ -45,7 +45,7 @@ USER nobody:nogroup
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    cd vendor/git.savannah.gnu.org/r/freetype/freetype2.git/ \
+    cd vendor/gitlab.freedesktop.org/freetype/freetype.git/ \
  && NOCONFIGURE=1 ./autogen.sh \
  # workaround for docker #9547 (Text file busy) \
  && sync \
@@ -54,10 +54,10 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install/lib $LINKFLAGS" \
+ENV PKG_CONFIG_PATH="/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib $LINKFLAGS" \
     # Required for poppler cmake \
-    FREETYPE_DIR=/src/vendor/git.savannah.gnu.org/r/freetype/freetype2.git/build/install
+    FREETYPE_DIR=/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
@@ -97,7 +97,7 @@ ENV PKG_CONFIG_PATH="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib
     CXXFLAGS="-I/src/vendor/github.com/uclouvain/openjpeg/build/install/include $CXXFLAGS" \
     LDFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LDFLAGS" \
     LINKFLAGS="-L/src/vendor/github.com/uclouvain/openjpeg/build/install/lib $LINKFLAGS" \
-    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib/openjpeg-2.3"
+    OpenJPEG_DIR="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib/cmake/openjpeg-2.5"
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
