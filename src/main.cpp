@@ -25,7 +25,6 @@
 #include <TextOutputDev.h>
 #include <UTF.h>
 #include <UnicodeMap.h>
-#include <goo/GooList.h>
 #include <goo/GooString.h>
 #include <goo/gfile.h>
 #include <splash/SplashBitmap.h>
@@ -161,17 +160,17 @@ static const char *fontTypeNames[] = {
 
 void dump_font_info(PDFDoc *doc) {
   FontInfoScanner scanner(doc, 0);
-  GooList *fonts = scanner.scan(doc->getNumPages());
+  std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
 
   if (!fonts) {
     packer.pack_nil();
     return;
   }
 
-  packer.pack_array(fonts->getLength());
+  packer.pack_array(fonts->size());
 
-  for (int i = 0; i < fonts->getLength(); ++i) {
-    auto font = reinterpret_cast<FontInfo *>(fonts->get(i));
+  for (std::size_t i = 0; i < fonts->size(); ++i) {
+    auto font = reinterpret_cast<FontInfo *>((*fonts)[i]);
 
     packer.pack_map(6);
 
@@ -343,14 +342,14 @@ TextPagePtr page_to_text_page(Page *page) {
   return TextPagePtr(dev->takeText(), TextPageDecRef);
 }
 
-int count_glyphs(GooList **lines, int n_lines) {
+int count_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
   int total_glyphs = 0;
 
   for (int i = 0; i < n_lines; i++) {
     auto *words = lines[i];
-    total_glyphs += words->getLength() - 1; // spaces
-    for (int j = 0; j < words->getLength(); j++) {
-      auto *x = reinterpret_cast<TextWordSelection *>(words->get(j));
+    total_glyphs += words->size() - 1; // spaces
+    for (std::size_t j = 0; j < words->size(); j++) {
+      auto *x = reinterpret_cast<TextWordSelection *>((*words)[j]);
       auto *word = reinterpret_cast<TextWord *>(x->getWord());
       total_glyphs += word->getLength();
     }
@@ -358,14 +357,14 @@ int count_glyphs(GooList **lines, int n_lines) {
   return total_glyphs;
 }
 
-void dump_glyphs(GooList **lines, int n_lines) {
+void dump_glyphs(std::vector<TextWordSelection*> **lines, int n_lines) {
   // Lines
   for (int i = 0; i < n_lines; i++) {
-    GooList *line_words = lines[i];
+    std::vector<TextWordSelection*> *line_words = lines[i];
 
     // Words
-    for (int j = 0; j < line_words->getLength(); j++) {
-      auto word_sel = reinterpret_cast<TextWordSelection *>(line_words->get(j));
+    for (std::size_t j = 0; j < line_words->size(); j++) {
+      auto word_sel = reinterpret_cast<TextWordSelection *>((*line_words)[j]);
       TextWord *word = word_sel->getWord();
 
       // Glyphs
@@ -382,9 +381,9 @@ void dump_glyphs(GooList **lines, int n_lines) {
       word->getBBox(&x1, &y1, &x2, &y2);
 
       // Spaces
-      if (j < line_words->getLength() - 1) {
+      if (j < line_words->size() - 1) {
         auto word_sel =
-            reinterpret_cast<TextWordSelection *>(line_words->get(j + 1));
+            reinterpret_cast<TextWordSelection *>((*line_words)[j + 1]);
         word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
         // space is from one word to other and with the same height as
         // first word.
@@ -409,13 +408,16 @@ void dump_page_glyphs(Page *page) {
   PDFRectangle whole_page(-inf, -inf, inf, inf);
 
   int n_lines;
-  auto deleter = [&](GooList **lines) {
+  auto deleter = [&](std::vector<TextWordSelection*> **lines) {
     for (int i = 0; i < n_lines; i++) {
-      deleteGooList<TextWordSelection>(lines[i]);
+      for (auto entry : *(lines[i])) {
+        delete entry;
+      }
+      delete lines[i];
     }
     gfree(lines);
   };
-  auto word_list = std::unique_ptr<GooList *, decltype(deleter)>(
+  auto word_list = std::unique_ptr<std::vector<TextWordSelection*> *, decltype(deleter)>(
       text->getSelectionWords(&whole_page, selectionStyleGlyph, &n_lines),
       deleter);
 
