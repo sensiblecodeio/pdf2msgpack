@@ -3,7 +3,7 @@ top = '.'
 out = 'build'
 
 from waflib.TaskGen import after_method, feature
-
+import clang_compilation_database
 
 @feature('static_linking')
 @after_method('apply_link', 'propagate_uselib_vars')
@@ -36,7 +36,7 @@ def options(opt):
 
 def configure(ctx):
     ctx.load('compiler_cxx')
-
+    ctx.load('clang_compilation_database')
     ctx.check(features='cxx cxxprogram', cxxflags="--std=c++14")
 
     ctx.env.append_value("CXXFLAGS", [

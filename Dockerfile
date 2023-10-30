@@ -19,6 +19,7 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       bzip2-static \
       cmake \
       ccache \
+      clang16-extra-tools \
       expat-dev \
       expat-static \
       gettext-dev \
@@ -122,7 +123,7 @@ ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git
 
 
 COPY --chown=nobody:nogroup ./src /src/src
-COPY --chown=nobody:nogroup waf wscript .
+COPY --chown=nobody:nogroup waf wscript clang_compilation_database.py .
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
