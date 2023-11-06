@@ -132,7 +132,7 @@ public:
   }
 };
 
-static std::string fmt(const Object &o, UnicodeMap *uMap) {
+static std::string fmt(const Object &o, const UnicodeMap *uMap) {
   if (!o.isString())
     return "<not string>";
 
@@ -210,7 +210,7 @@ void pack_string(const GooString *string) {
     packer.pack(string->toStr());
 }
 
-void dump_meta_xfa(Catalog *catalog, UnicodeMap *uMap) {
+void dump_meta_xfa(Catalog *catalog, const UnicodeMap *uMap) {
   auto xfa = catalog->getAcroForm()->dictLookup("XFA");
 
   if (xfa.isStream()) {
@@ -253,7 +253,7 @@ void dump_meta_embedded_files(Catalog *catalog) {
 }
 
 void dump_document_meta(const std::string filename, PDFDoc *doc,
-                        UnicodeMap *uMap, const Options &options) {
+                        const UnicodeMap *uMap, const Options &options) {
   Catalog *catalog = doc->getCatalog();
   std::map<std::string, std::string> m;
 
@@ -628,7 +628,7 @@ int main(int argc, char *argv[]) {
     globalParams = std::make_unique<GlobalParams>("/usr/share/poppler");
   }
 
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   if (!(uMap = globalParams->getTextEncoding())) {
     exit(127);
   }
