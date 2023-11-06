@@ -160,18 +160,16 @@ static const char *fontTypeNames[] = {
 
 void dump_font_info(PDFDoc *doc) {
   FontInfoScanner scanner(doc, 0);
-  std::vector<FontInfo*> *fonts = scanner.scan(doc->getNumPages());
+  const std::vector<FontInfo*> fonts = scanner.scan(doc->getNumPages());
 
-  if (!fonts) {
+  if (fonts.empty()) {
     packer.pack_nil();
     return;
   }
 
-  packer.pack_array(fonts->size());
+  packer.pack_array(fonts.size());
 
-  for (std::size_t i = 0; i < fonts->size(); ++i) {
-    auto font = reinterpret_cast<FontInfo *>((*fonts)[i]);
-
+  for (FontInfo* font : fonts) {
     packer.pack_map(6);
 
     packer.pack("Name");
