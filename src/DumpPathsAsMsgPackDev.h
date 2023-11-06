@@ -166,7 +166,7 @@ public:
     }
   }
 
-  void doPath(GfxState *state, const Mat2x3 &transform, GfxPath *path,
+  void doPath(GfxState *state, const Mat2x3 &transform, const GfxPath *path,
               int path_type) {
     recordStateChanges(state, path_type);
 
