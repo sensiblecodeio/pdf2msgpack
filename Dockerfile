@@ -109,6 +109,7 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
           -DENABLE_GLIB:BOOL=OFF \
           -DENABLE_CPP:BOOL=OFF \
           -DENABLE_UTILS:BOOL=OFF \
+          -DENABLE_BOOST:BOOL=OFF \
           -DBUILD_SHARED_LIBS:BOOL=OFF \
           -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON \
           -DCMAKE_BUILD_TYPE:STRING=release \
