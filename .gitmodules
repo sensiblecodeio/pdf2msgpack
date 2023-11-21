@@ -12,7 +12,7 @@
 	url = https://github.com/uclouvain/openjpeg
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
-	url = https://anongit.freedesktop.org/git/poppler/poppler.git
+	url = https://github.com/sensiblecodeio/poppler.git
 [submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
 	path = vendor/github.com/sensiblecodeio/msgpack-c
 	url = https://github.com/sensiblecodeio/msgpack-c
