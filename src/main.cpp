@@ -140,7 +140,7 @@ static std::string fmt(const Object &o, const UnicodeMap *uMap) {
 
   char buf[9];
   Unicode *u;
-  auto len = TextStringToUCS4(s, &u);
+  auto len = TextStringToUCS4(s->toStr(), &u);
 
   std::string out;
   out.reserve(static_cast<size_t>(len));
@@ -173,13 +173,13 @@ void dump_font_info(PDFDoc *doc) {
     packer.pack_map(6);
 
     packer.pack("Name");
-    packer.pack(font->getName() ? font->getName()->toStr() : "[none]");
+    packer.pack(font->getName().value_or("[none]"));
 
     packer.pack("Type");
     packer.pack(fontTypeNames[font->getType()]);
 
     packer.pack("Encoding");
-    packer.pack(font->getEncoding()->toStr());
+    packer.pack(font->getEncoding());
 
     packer.pack("Embedded");
     packer.pack(font->getEmbedded());
@@ -239,7 +239,7 @@ void dump_meta_xfa(Catalog *catalog, const UnicodeMap *uMap) {
 void dump_meta_embedded_files(Catalog *catalog) {
   packer.pack_array(catalog->numEmbeddedFiles());
   for (int i = 0; i < catalog->numEmbeddedFiles(); i++) {
-    FileSpec *spec = catalog->embeddedFile(i);
+    std::unique_ptr<FileSpec> spec = catalog->embeddedFile(i);
     EmbFile *file = spec->getEmbeddedFile();
 
     packer.pack_array(6);
@@ -308,8 +308,7 @@ void TextPageDecRef(TextPage *text_page) { text_page->decRefCnt(); }
 void render_annotations(std::unique_ptr<Gfx> &gfx, Annots *annots) {
   gfx->saveState();
 
-  for (auto i = 0; i < annots->getNumAnnots(); i++) {
-    auto *annot = annots->getAnnot(i);
+  for (Annot *annot : annots->getAnnots()) {
     annot->draw(gfx.get(), false);
   }
 
@@ -517,14 +516,16 @@ void dump_document(PDFDoc *doc, const Options &options) {
 }
 
 BaseStream *open_file(const std::string filename) {
-  GooString goo_filename(filename.c_str());
-  auto file = GooFile::open(&goo_filename);
+  // Original
+  // GooString goo_filename(filename.c_str());
+  // auto file = GooFile::open(&goo_filename);
+  std::unique_ptr<GooFile> file = GooFile::open(filename);
   if (file == NULL) {
     std::cerr << "Failed to open " << filename << std::endl;
     exit(5);
   }
   Object obj;
-  return new FileStream(file, 0, false, file->size(), Object(objNull));
+  return new FileStream(file.release(), 0, false, file->size(), Object(objNull));
 }
 
 std::string parse_page_range(std::string value, Options *options) {
