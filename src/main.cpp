@@ -320,6 +320,9 @@ typedef std::unique_ptr<TextPage, decltype(&TextPageDecRef)> TextPagePtr;
 
 TextPagePtr page_to_text_page(Page *page) {
   auto dev = std::make_unique<TextOutputDev>(nullptr, true, 0, false, false);
+  // This value was changed in Poppler commit f20d9e5f739b7c8dce74ebc60a6dd1e06106c12e
+  // We retain the original value to keep outputs unchanged for now.
+  dev->setMinColSpacing1(0.3);
 
   auto gfx = std::unique_ptr<Gfx>(
       page->createGfx(dev.get(), 72.0, 72.0, 0, false, /* useMediaBox */
