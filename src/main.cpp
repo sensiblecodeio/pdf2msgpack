@@ -520,9 +520,6 @@ void dump_document(PDFDoc *doc, const Options &options) {
 }
 
 BaseStream *open_file(const std::string filename) {
-  // Original
-  // GooString goo_filename(filename.c_str());
-  // auto file = GooFile::open(&goo_filename);
   auto file = GooFile::open(filename);
   if (file == NULL) {
     std::cerr << "Failed to open " << filename << std::endl;
