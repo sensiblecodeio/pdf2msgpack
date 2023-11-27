@@ -140,7 +140,7 @@ static std::string fmt(const Object &o, const UnicodeMap *uMap) {
 
   char buf[9];
   Unicode *u;
-  auto len = TextStringToUCS4(s, &u);
+  auto len = TextStringToUCS4(s->toStr(), &u);
 
   std::string out;
   out.reserve(static_cast<size_t>(len));
@@ -173,13 +173,13 @@ void dump_font_info(PDFDoc *doc) {
     packer.pack_map(6);
 
     packer.pack("Name");
-    packer.pack(font->getName() ? font->getName()->toStr() : "[none]");
+    packer.pack(font->getName().value_or("[none]"));
 
     packer.pack("Type");
     packer.pack(fontTypeNames[font->getType()]);
 
     packer.pack("Encoding");
-    packer.pack(font->getEncoding()->toStr());
+    packer.pack(font->getEncoding());
 
     packer.pack("Embedded");
     packer.pack(font->getEmbedded());
@@ -239,7 +239,7 @@ void dump_meta_xfa(Catalog *catalog, const UnicodeMap *uMap) {
 void dump_meta_embedded_files(Catalog *catalog) {
   packer.pack_array(catalog->numEmbeddedFiles());
   for (int i = 0; i < catalog->numEmbeddedFiles(); i++) {
-    FileSpec *spec = catalog->embeddedFile(i);
+    std::unique_ptr<FileSpec> spec = catalog->embeddedFile(i);
     EmbFile *file = spec->getEmbeddedFile();
 
     packer.pack_array(6);
@@ -320,6 +320,9 @@ typedef std::unique_ptr<TextPage, decltype(&TextPageDecRef)> TextPagePtr;
 
 TextPagePtr page_to_text_page(Page *page) {
   auto dev = std::make_unique<TextOutputDev>(nullptr, true, 0, false, false);
+  // This value was changed in Poppler commit f20d9e5f739b7c8dce74ebc60a6dd1e06106c12e
+  // We retain the original value to keep outputs unchanged for now.
+  dev->setMinColSpacing1(0.3);
 
   auto gfx = std::unique_ptr<Gfx>(
       page->createGfx(dev.get(), 72.0, 72.0, 0, false, /* useMediaBox */
@@ -517,8 +520,10 @@ void dump_document(PDFDoc *doc, const Options &options) {
 }
 
 BaseStream *open_file(const std::string filename) {
-  GooString goo_filename(filename.c_str());
-  auto file = GooFile::open(&goo_filename);
+  // Original
+  // GooString goo_filename(filename.c_str());
+  // auto file = GooFile::open(&goo_filename);
+  auto file = GooFile::open(filename);
   if (file == NULL) {
     std::cerr << "Failed to open " << filename << std::endl;
     exit(5);

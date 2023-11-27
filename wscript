@@ -37,14 +37,14 @@ def options(opt):
 def configure(ctx):
     ctx.load('compiler_cxx')
 
-    ctx.check(features='cxx cxxprogram', cxxflags="--std=c++14")
+    ctx.check(features='cxx cxxprogram', cxxflags="--std=c++17")
 
     ctx.env.append_value("CXXFLAGS", [
         "-g",
         "-Wall",
         "-Werror",
         "-ansi",
-        "--std=c++14",
+        "--std=c++17",
         "-DMSGPACK_NO_BOOST",
     ])
 
