@@ -114,6 +114,12 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
           -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON \
           -DCMAKE_BUILD_TYPE:STRING=release \
           -DENABLE_LIBOPENJPEG:STRING=openjpeg2 \
+          -DENABLE_NSS3:BOOL=OFF \
+          -DENABLE_GPGME:BOOL=OFF \
+          -DENABLE_LIBTIFF:BOOL=OFF \
+          -DENABLE_QT5:BOOL=OFF \
+          -DENABLE_QT6:BOOL=OFF \
+          -DENABLE_LIBCURL:BOOL=OFF \
  && make V=1 -j${BUILD_CONCURRENCY} \
  && make install
 
