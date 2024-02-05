@@ -1,10 +1,10 @@
 # syntax = docker/dockerfile:experimental
 
-FROM alpine:3.18 AS cachebase
+FROM alpine:3.19 AS cachebase
 RUN mkdir -p /tmp/ccache \
  && chown nobody:nogroup /tmp/ccache
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 ARG BUILD_CONCURRENCY=4
 
@@ -33,6 +33,7 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       linux-headers \
       python3 \
       util-linux-dev \
+      util-linux-static \
       zlib-dev \
       zlib-static
 
