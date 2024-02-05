@@ -33,6 +33,7 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk-cache \
       linux-headers \
       python3 \
       util-linux-dev \
+      util-linux-static \
       zlib-dev \
       zlib-static
 
