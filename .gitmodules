@@ -1,8 +1,8 @@
 [submodule "vendor/gitlab.freedesktop.org/freetype/freetype.git"]
-	path = vendor/gitlab.freedesktop.org/freetype/freetype.git
+	path = vendor/gitlab.freedesktop.org/freetype/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "vendor/anongit.freedesktop.org/git/fontconfig"]
-	path = vendor/anongit.freedesktop.org/git/fontconfig
+	path = vendor/gitlab.freedesktop.org/fontconfig/fontconfig
 	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
 [submodule "vendor/github.com/mm2/Little-CMS"]
 	path = vendor/github.com/mm2/Little-CMS
@@ -11,7 +11,7 @@
 	path = vendor/github.com/uclouvain/openjpeg
 	url = https://github.com/uclouvain/openjpeg
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
-	path = vendor/anongit.freedesktop.org/git/poppler/poppler.git
+	path = vendor/github.com/sensiblecodeio/poppler
 	url = https://github.com/sensiblecodeio/poppler.git
 [submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
 	path = vendor/github.com/sensiblecodeio/msgpack-c
