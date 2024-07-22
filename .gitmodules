@@ -1,4 +1,4 @@
-[submodule "vendor/gitlab.freedesktop.org/freetype/freetype.git"]
+[submodule "vendor/gitlab.freedesktop.org/freetype/freetype"]
 	path = vendor/gitlab.freedesktop.org/freetype/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "vendor/anongit.freedesktop.org/git/fontconfig"]
@@ -6,15 +6,15 @@
 	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
 [submodule "vendor/github.com/mm2/Little-CMS"]
 	path = vendor/github.com/mm2/Little-CMS
-	url = https://github.com/mm2/Little-CMS
+	url = https://github.com/mm2/Little-CMS.git
 [submodule "vendor/github.com/uclouvain/openjpeg"]
 	path = vendor/github.com/uclouvain/openjpeg
-	url = https://github.com/uclouvain/openjpeg
-[submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
+	url = https://github.com/uclouvain/openjpeg.git
+[submodule "vendor/anongit.freedesktop.org/git/poppler/poppler"]
 	path = vendor/github.com/sensiblecodeio/poppler
 	url = https://github.com/sensiblecodeio/poppler.git
 	branch = pdf2msgpack
 [submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
 	path = vendor/github.com/sensiblecodeio/msgpack-c
-	url = https://github.com/sensiblecodeio/msgpack-c
+	url = https://github.com/sensiblecodeio/msgpack-c.git
 	branch = cpp-6.1.0-with-4.1.1-float-double-behaviour
