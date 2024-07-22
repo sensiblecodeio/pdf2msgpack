@@ -46,7 +46,7 @@ USER nobody:nogroup
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    cd vendor/gitlab.freedesktop.org/freetype/freetype.git/ \
+    cd vendor/gitlab.freedesktop.org/freetype/freetype/ \
  && NOCONFIGURE=1 ./autogen.sh \
  # workaround for docker #9547 (Text file busy) \
  && sync \
@@ -55,23 +55,23 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install/lib $LINKFLAGS" \
+ENV PKG_CONFIG_PATH="/src/vendor/gitlab.freedesktop.org/freetype/freetype/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/gitlab.freedesktop.org/freetype/freetype/build/install/lib $LINKFLAGS" \
     # Required for poppler cmake \
-    FREETYPE_DIR=/src/vendor/gitlab.freedesktop.org/freetype/freetype.git/build/install
+    FREETYPE_DIR=/src/vendor/gitlab.freedesktop.org/freetype/freetype/build/install
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    cd vendor/anongit.freedesktop.org/git/fontconfig \
+    cd vendor/gitlab.freedesktop.org/fontconfig/fontconfig/ \
  && NOCONFIGURE=1 ./autogen.sh \
  && mkdir build && cd build \
  && ../configure --prefix=$PWD/install --enable-static \
  && make -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/fontconfig/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/fontconfig/build/install/lib $LINKFLAGS"
+ENV PKG_CONFIG_PATH="/src/vendor/gitlab.freedesktop.org/fontconfig/fontconfig/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/gitlab.freedesktop.org/fontconfig/fontconfig/build/install/lib $LINKFLAGS"
 
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
@@ -103,7 +103,7 @@ ENV PKG_CONFIG_PATH="/src/vendor/github.com/uclouvain/openjpeg/build/install/lib
 
 RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cachebase \
     \
-    cd vendor/anongit.freedesktop.org/git/poppler/poppler.git \
+    cd vendor/github.com/sensiblecodeio/poppler/ \
  && mkdir build && cd build \
  && cmake .. \
           -DCMAKE_INSTALL_PREFIX=$PWD/install \
@@ -124,9 +124,9 @@ RUN --mount=type=cache,src=/tmp/ccache,target=/tmp/ccache,id=ccache,from=cacheba
  && make V=1 -j${BUILD_CONCURRENCY} \
  && make install
 
-ENV PKG_CONFIG_PATH="/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    LINKFLAGS="-L/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/lib $LINKFLAGS" \
-    CXXFLAGS="-I/src/vendor/anongit.freedesktop.org/git/poppler/poppler.git/build/install/include $CXXFLAGS"
+ENV PKG_CONFIG_PATH="/src/vendor/github.com/sensiblecodeio/poppler/build/install/lib/pkgconfig:$PKG_CONFIG_PATH" \
+    LINKFLAGS="-L/src/vendor/github.com/sensiblecodeio/poppler/build/install/lib $LINKFLAGS" \
+    CXXFLAGS="-I/src/vendor/github.com/sensiblecodeio/poppler/build/install/include $CXXFLAGS"
 
 
 COPY --chown=nobody:nogroup ./src /src/src
