@@ -13,6 +13,7 @@
 [submodule "vendor/anongit.freedesktop.org/git/poppler/poppler.git"]
 	path = vendor/github.com/sensiblecodeio/poppler
 	url = https://github.com/sensiblecodeio/poppler.git
+	branch = pdf2msgpack
 [submodule "vendor/github.com/sensiblecodeio/msgpack-c"]
 	path = vendor/github.com/sensiblecodeio/msgpack-c
 	url = https://github.com/sensiblecodeio/msgpack-c
